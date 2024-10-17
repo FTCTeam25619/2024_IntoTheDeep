@@ -6,7 +6,6 @@ public final class Constants {
         public static final String frontRightWheel = "front_right_wheel";
         public static final String backLeftWheel = "back_left_wheel";
         public static final String backRightWheel = "back_right_wheel";
-
     }
 
     public static final class OpModes{
@@ -14,18 +13,19 @@ public final class Constants {
             TELEOP,
             AUTO;
         }
+        
         public enum OpModeSelection{
-        DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
+            DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
 
-        private OpModeType opModeType;
+            private OpModeType opModeType;
 
-        private OpModeSelection(OpModeType opmodeTypeSetting){
-            opModeType = opmodeTypeSetting;
-        }
+            private OpModeSelection(OpModeType opmodeTypeSetting){
+                opModeType = opmodeTypeSetting;
+            }
 
-        public OpModeType getOpModeType(){
-            return opModeType;
-        }
+            public OpModeType getOpModeType(){
+                return opModeType;
+            }
         }
     }
 }
