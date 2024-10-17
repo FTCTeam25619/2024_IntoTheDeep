@@ -22,9 +22,9 @@ public class Drivetrain extends SubsystemBase {
         backLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.backLeftWheel);
         backRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.backRightWheel);
 
-        frontLeftWheel.setInverted(false);
-        frontRightWheel.setInverted(false);
-        backRightWheel.setInverted(false);
+        frontLeftWheel.setInverted(true);
+        frontRightWheel.setInverted(true);
+        backRightWheel.setInverted(true);
         backLeftWheel.setInverted(false);
 
         frontLeftWheel.setRunMode(Motor.RunMode.RawPower);
@@ -36,6 +36,14 @@ public class Drivetrain extends SubsystemBase {
 
         mTelemetry = telemetry;
     }
+
+    public void stopDrive(){
+        frontLeftWheel.set(0.0);
+        frontRightWheel.set(0.0);
+        backLeftWheel.set(0.0);
+        backRightWheel.set(0.0);
+    }
+
     public void driveRobot(double power, double theta, double turn){
         double sinTheta = Math.sin(theta - Math.PI/4);
         double cosTheta = Math.cos(theta - Math.PI/4);
@@ -55,8 +63,12 @@ public class Drivetrain extends SubsystemBase {
             leftRear /= scaling;
             rightFront /= scaling;
 
-
         }
+
+        frontLeftWheel.set(leftFront);
+        frontRightWheel.set(rightFront);
+        backLeftWheel.set(leftRear);
+        backRightWheel.set(rightRear);
     }
 }
 

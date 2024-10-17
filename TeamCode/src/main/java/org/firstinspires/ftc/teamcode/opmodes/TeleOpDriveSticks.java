@@ -1,0 +1,43 @@
+
+package org.firstinspires.ftc.teamcode.opmodes;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
+import org.firstinspires.ftc.teamcode.Robot2024;
+
+@TeleOp
+public class TeleOpDriveSticks  extends OpMode {
+    private Robot2024 robot;
+
+    @Override
+    public void init() {
+        robot = new Robot2024(hardwareMap, gamepad1,telemetry, OpModeSelection.DRIVE_STICKS_TELEOP);
+
+        telemetry.addData("Robot Status", "Initializing TeleOpDriveSticks");
+    }
+
+    @Override
+    public void init_loop() {
+        // Fancy LED loop that tells us which OpMode is active and wows the audience
+        // before we hit the play button at the match start
+    }
+
+    @Override
+    public void start() {
+        telemetry.addData("Robot Status", "Running TeleOpDriveSticks");
+        robot.initOpMode();
+    }
+
+    @Override
+    public void loop() {
+        robot.run();
+    }
+
+    @Override
+    public void stop() {
+        telemetry.addData("Robot Status", "Stopped TeleOpDriveSticks");
+        robot.reset();
+    }
+}

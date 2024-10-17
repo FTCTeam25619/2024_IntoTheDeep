@@ -8,4 +8,24 @@ public final class Constants {
         public static final String backRightWheel = "back_right_wheel";
 
     }
+
+    public static final class OpModes{
+        public enum OpModeType{
+            TELEOP,
+            AUTO;
+        }
+        public enum OpModeSelection{
+        DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
+
+        private OpModeType opModeType;
+
+        private OpModeSelection(OpModeType opmodeTypeSetting){
+            opModeType = opmodeTypeSetting;
+        }
+
+        public OpModeType getOpModeType(){
+            return opModeType;
+        }
+        }
+    }
 }
