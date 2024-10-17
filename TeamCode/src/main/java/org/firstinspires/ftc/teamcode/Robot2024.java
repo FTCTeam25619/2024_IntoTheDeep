@@ -1,6 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.Robot;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import org.firstinspires.ftc.teamcode.commands.DriveRobot;
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
+
 
 /* To connect to the Control Hub device via Wi-Fi:
    - Connect Wi-Fi to the FTC-25619 network
@@ -11,5 +22,30 @@ import com.arcrobotics.ftclib.command.Robot;
  */
  
 public class Robot2024 extends Robot {
+    private final GamepadEx controller1;
+    private final Drivetrain drivetrain;
+    public static Telemetry telemetry;
 
+    private final OpModeSelection selectedOpMode;
+
+    public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Telemetry telemetry, OpModeSelection opModeSelection) {
+        // OpMode selection
+        selectedOpMode = opModeSelection;
+
+        // Telemetry
+        Robot2024.telemetry = telemetry;
+
+        // Subsystems
+        drivetrain = new Drivetrain(hardwareMap, Robot2024.telemetry);
+
+        // Controllers
+        controller1 = new GamepadEx(gamepad1);
+    }
+
+    public void initOpMode() {
+        switch (selectedOpMode) {
+            case DRIVE_STICKS_TELEOP:
+                CommandScheduler.getInstance().schedule(new DriveRobot(drivetrain, controller1));
+        }
+    }
 }
