@@ -4,9 +4,11 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.ftccommon.external.OnCreate;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.lib.OdometryData;
 
 public class Drivetrain extends SubsystemBase {
     private Motor frontLeftWheel;
@@ -15,8 +17,9 @@ public class Drivetrain extends SubsystemBase {
     private Motor backRightWheel;
 
     private Telemetry mTelemetry;
+    private Sensors mSensors;
 
-    public Drivetrain(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Drivetrain(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry) {
         frontLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontLeftWheel);
         frontRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontRightWheel);
         backLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.backLeftWheel);
@@ -32,9 +35,20 @@ public class Drivetrain extends SubsystemBase {
         backLeftWheel.setRunMode(Motor.RunMode.RawPower);
         backRightWheel.setRunMode(Motor.RunMode.RawPower);
 
-
-
+        mSensors = sensors;
         mTelemetry = telemetry;
+    }
+
+    @Override
+    public void periodic() {
+        OdometryData odomData = mSensors.getOdometryData();
+        mTelemetry.addData("L Odom Pos", odomData.leftOdometerPosition);
+        mTelemetry.addData("R Odom Pos", odomData.rightOdometerPosition);
+        mTelemetry.addData("P Odom Pos", odomData.perpendicularOdometerPosition);
+        mTelemetry.addData("L Odom Vel", odomData.leftOdometerVelocity);
+        mTelemetry.addData("R Odom Vel", odomData.rightOdometerVelocity);
+        mTelemetry.addData("P Odom Vel", odomData.perpendicularOdometerVelocity);
+        mTelemetry.addData("Gyro Heading", odomData.gyroHeading.getDegrees());
     }
 
     public void stopDrive(){
