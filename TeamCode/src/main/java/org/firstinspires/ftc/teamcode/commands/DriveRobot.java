@@ -29,32 +29,31 @@ public class DriveRobot extends CommandBase {
         double rawY = mController1.getLeftY();
         double rawX = mController1.getLeftX();
         double rawTurn = mController1.getRightX();
-//        mTelemetry.addData("Y input raw", rawY);
-//        mTelemetry.addData("X input raw", rawX);
-//        mTelemetry.addData("Turn input raw", rawTurn);
 
+        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Y input raw", rawY);
+            mTelemetry.addData("X input raw", rawX);
+            mTelemetry.addData("Turn input raw", rawTurn);
+        }
+
+        // Transform raw inputs to coordinate system:
+        // X+ forward, Y+ left, Turn+ CCW
         double x = rawY;
         double y = rawX;
         double turn = -rawTurn;
-//        mTelemetry.addData("Y input signed", y);
-//        mTelemetry.addData("X input signed", x);
-//        mTelemetry.addData("Turn input signed", turn);
+        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Y input signed", y);
+            mTelemetry.addData("X input signed", x);
+            mTelemetry.addData("Turn input signed", turn);
+        }
 
+        // Prepare drive inputs (deadband, smooth, scale)
         double power = Math.hypot(y, x);
         double theta = -Math.atan2(y, x);
-        power = DriveHelpers.smoothJoystick(
-                DriveHelpers.deadBandJoystick(
-                        power,
-                        Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW));
-        turn = DriveHelpers.smoothJoystick(
-                DriveHelpers.deadBandJoystick(
-                        turn,
-                        Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW));
-
-        if (Constants.RobotModes.SLOW_DRIVE_MODE) {
-            power /= Constants.DriveControl.SLOW_DRIVE_MODE_FACTOR;
-            turn /= Constants.DriveControl.SLOW_DRIVE_MODE_FACTOR;
-        }
+        power = this.prepareDriveInputs(power,
+                Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW);
+        turn = this.prepareDriveInputs(turn,
+                Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW);
 
         mTelemetry.addData("Drive power final", power);
         mTelemetry.addData("Drive angle final", theta);
@@ -75,5 +74,21 @@ public class DriveRobot extends CommandBase {
     @Override
     public boolean isFinished() {
         return false;
+    }
+
+    /*
+     * Prepare drive inputs by doing the following:
+     *   - Applying the provided joystick dead band
+     *   - Smoothing the joystick input via cubing (expects inputs in [-1, 1],
+     *     and will clamp the inputs to that range if outside)
+     *   - Applying scaling for slow mode as needed
+     */
+    private double prepareDriveInputs(double input, double deadBandSize) {
+        double prepared = DriveHelpers.deadBandJoystick(input, deadBandSize);
+        prepared = DriveHelpers.smoothJoystick(prepared);
+        if (Constants.RobotModes.SLOW_DRIVE_MODE) {
+            prepared /= Constants.DriveControl.SLOW_DRIVE_MODE_FACTOR;
+        }
+        return prepared;
     }
 }

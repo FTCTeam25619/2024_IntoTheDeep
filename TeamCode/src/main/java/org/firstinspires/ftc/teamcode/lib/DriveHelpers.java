@@ -28,4 +28,11 @@ public final class DriveHelpers {
         }
         return rawInput;
     }
+
+    public static double computeWheelScaling(double leftFront, double rightFront, double leftRear, double rightRear) {
+        return Math.max(
+                Math.max(Math.abs(leftFront), Math.abs(rightFront)),
+                Math.max(Math.abs(leftRear), Math.abs(rightRear))
+        );
+    }
 }

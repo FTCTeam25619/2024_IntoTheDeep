@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
     public static final class RobotModes {
+        public static final boolean DEBUG_TELEMETRY = false;
         public static final boolean SLOW_DRIVE_MODE = true;
         public static final boolean FIELD_CENTRIC_DRIVE = true;
         public static final boolean FTCLIB_DRIVE_CONTROL = true;

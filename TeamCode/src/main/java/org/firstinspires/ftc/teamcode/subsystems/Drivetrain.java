@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.lib.OdometryData;
 
 public class Drivetrain extends SubsystemBase {
@@ -127,16 +128,7 @@ public class Drivetrain extends SubsystemBase {
             mTelemetry.addData("LR power (prescale)", leftRear);
             mTelemetry.addData("RR power (prescale)", rightRear);
 
-            double scaling = Math.max(
-                    Math.max(
-                        Math.abs(leftFront),
-                        Math.abs(rightFront)
-                    ),
-                    Math.max(
-                        Math.abs(leftRear),
-                        Math.abs(rightRear)
-                    )
-            );
+            double scaling = DriveHelpers.computeWheelScaling(leftFront, rightFront, leftRear, rightRear);
 
             mTelemetry.addData("Scaling factor", scaling);
 
