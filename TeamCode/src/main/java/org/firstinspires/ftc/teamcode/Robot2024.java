@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.Robot;
+import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -24,6 +27,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Sensors;
  */
  
 public class Robot2024 extends Robot {
+    private final RobotState robotState;
     private final GamepadEx controller1;
     private final Sensors sensors;
     private final Drivetrain drivetrain;
@@ -39,6 +43,9 @@ public class Robot2024 extends Robot {
         // Telemetry
         Robot2024.telemetry = telemetry;
 
+        // Robot state
+        robotState = new RobotState(Robot2024.telemetry);
+
         // Gyro Orientation on Robot
         gyroOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
@@ -46,7 +53,7 @@ public class Robot2024 extends Robot {
 
         // Subsystems
         sensors = new Sensors(hardwareMap, gyroOrientation, Robot2024.telemetry);
-        drivetrain = new Drivetrain(hardwareMap, sensors, Robot2024.telemetry);
+        drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
 
         // Controllers
         controller1 = new GamepadEx(gamepad1);
@@ -55,7 +62,18 @@ public class Robot2024 extends Robot {
     public void initOpMode() {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
-                CommandScheduler.getInstance().schedule(new DriveRobot(drivetrain, controller1, Robot2024.telemetry));
+                CommandScheduler.getInstance().schedule(
+                        new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
         }
+        setupGamepadButtonMappings();
+    }
+
+    public void setupGamepadButtonMappings() {
+        GamepadButton c1LeftBumper = new GamepadButton(controller1, GamepadKeys.Button.LEFT_BUMPER);
+        c1LeftBumper.whenPressed(new InstantCommand(() -> robotState.setSlowDriveMode(true)));
+        c1LeftBumper.whenReleased(new InstantCommand(() -> robotState.setSlowDriveMode(false)));
+
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        c1Back.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
     }
 }

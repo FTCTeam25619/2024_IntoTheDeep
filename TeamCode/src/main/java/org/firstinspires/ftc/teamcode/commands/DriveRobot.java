@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
@@ -12,10 +13,12 @@ public class DriveRobot extends CommandBase {
     private final GamepadEx mController1;
     private final Drivetrain mSubsystem;
     private final Telemetry mTelemetry;
+    private final RobotState mRobotState;
 
-    public DriveRobot(Drivetrain subsystem, GamepadEx controller1, Telemetry robotTelemetry) {
+    public DriveRobot(Drivetrain subsystem, GamepadEx controller1, RobotState robotState, Telemetry robotTelemetry) {
         mSubsystem = subsystem;
         mController1 = controller1;
+        mRobotState = robotState;
         mTelemetry = robotTelemetry;
 
         addRequirements(mSubsystem);
@@ -59,7 +62,7 @@ public class DriveRobot extends CommandBase {
         mTelemetry.addData("Drive angle final", theta);
         mTelemetry.addData("Drive turn  final", turn);
 
-        if (Constants.RobotModes.FIELD_CENTRIC_DRIVE) {
+        if (mRobotState.robotDriveMode.fieldCentric) {
             mSubsystem.driveRobotFieldCentric(power, theta, turn);
         } else {
             mSubsystem.driveRobot(power, theta, turn);
@@ -86,7 +89,7 @@ public class DriveRobot extends CommandBase {
     private double prepareDriveInputs(double input, double deadBandSize) {
         double prepared = DriveHelpers.deadBandJoystick(input, deadBandSize);
         prepared = DriveHelpers.smoothJoystick(prepared);
-        if (Constants.RobotModes.SLOW_DRIVE_MODE) {
+        if (mRobotState.slowDriveMode) {
             prepared /= Constants.DriveControl.SLOW_DRIVE_MODE_FACTOR;
         }
         return prepared;

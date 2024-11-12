@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.lib.OdometryData;
 
@@ -20,9 +21,10 @@ public class Drivetrain extends SubsystemBase {
     private MecanumDrive mecanumDrive;
 
     private Telemetry mTelemetry;
+    private RobotState mRobotState;
     private Sensors mSensors;
 
-    public Drivetrain(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry) {
+    public Drivetrain(HardwareMap hardwareMap, Sensors sensors, RobotState robotState, Telemetry telemetry) {
         frontLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontLeftWheel);
         frontRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontRightWheel);
         backLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.backLeftWheel);
@@ -44,6 +46,7 @@ public class Drivetrain extends SubsystemBase {
         backRightWheel.setRunMode(Motor.RunMode.RawPower);
 
         mSensors = sensors;
+        mRobotState = robotState;
         mTelemetry = telemetry;
 
         // Create the FTCLib MecanumDrive object that actually drives the wheel powers
@@ -54,10 +57,6 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        mTelemetry.addData("Field Centric", Constants.RobotModes.FIELD_CENTRIC_DRIVE);
-        mTelemetry.addData("FTCLib Drive Control", Constants.RobotModes.FTCLIB_DRIVE_CONTROL);
-        mTelemetry.addData("Slow Drive Mode", Constants.RobotModes.SLOW_DRIVE_MODE);
-
         OdometryData odomData = mSensors.getOdometryData();
         mTelemetry.addData("Dt: L Odom Pos", odomData.leftOdometerPosition);
         mTelemetry.addData("Dt: R Odom Pos", odomData.rightOdometerPosition);
@@ -85,7 +84,7 @@ public class Drivetrain extends SubsystemBase {
      * Deadband and smoothing is expected to be already applied.
      */
     public void driveRobotFieldCentric(double power, double theta, double turn) {
-        if (Constants.RobotModes.FTCLIB_DRIVE_CONTROL) {
+        if (mRobotState.robotDriveMode.ftcLibDriveControl) {
             double strafeSpeed = power * Math.sin(theta);
             double forwardSpeed = power * Math.cos(theta);
             double gyroHeading = mSensors.getGyroHeadingDeg();
@@ -103,7 +102,7 @@ public class Drivetrain extends SubsystemBase {
      * applied. This is robot-centric drive only.
      */
     public void driveRobot(double power, double theta, double turn){
-        if (Constants.RobotModes.FTCLIB_DRIVE_CONTROL) {
+        if (mRobotState.robotDriveMode.ftcLibDriveControl) {
             double strafeSpeed = power * Math.sin(theta);
             double forwardSpeed = power * Math.cos(theta);
             this.mecanumDrive.driveRobotCentric(-strafeSpeed, forwardSpeed, -turn);
