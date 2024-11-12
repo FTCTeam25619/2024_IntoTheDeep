@@ -41,11 +41,11 @@ public class Robot2024 extends Robot {
 
         // Gyro Orientation on Robot
         gyroOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
+                RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
+                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT);
 
         // Subsystems
-        sensors = new Sensors(hardwareMap, gyroOrientation);
+        sensors = new Sensors(hardwareMap, gyroOrientation, Robot2024.telemetry);
         drivetrain = new Drivetrain(hardwareMap, sensors, Robot2024.telemetry);
 
         // Controllers
@@ -55,7 +55,7 @@ public class Robot2024 extends Robot {
     public void initOpMode() {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
-                CommandScheduler.getInstance().schedule(new DriveRobot(drivetrain, controller1));
+                CommandScheduler.getInstance().schedule(new DriveRobot(drivetrain, controller1, Robot2024.telemetry));
         }
     }
 }

@@ -7,13 +7,25 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public final class DriveHelpers {
     public static ChassisSpeeds getDesiredChassisSpeeds(double x, double y, double turn, Rotation2d currentGyro) {
-        DriveSpec spec = new DriveSpec(x, y, turn);
-
-        return ChassisSpeeds.fromFieldRelativeSpeeds(
-                spec.xScaledMPS, spec.yScaledMPS, spec.turnRPS, currentGyro);
+        return new ChassisSpeeds(0.0, 0.0, 0.0);
     }
 
     public static double odometryRawToMeters(double ticks) {
         return ticks * 2.0 * Math.PI * Constants.DriveBase.WHEEL_RADIUS_MM / 1000.0;
+    }
+
+    public static double smoothJoystick(double rawInput) {
+        double clamped = rawInput;
+        if (Math.abs(rawInput) > 1.0) {
+            clamped = Math.signum(rawInput);
+        }
+        return clamped * clamped * clamped;
+    }
+
+    public static double deadBandJoystick(double rawInput, double bandSize) {
+        if (Math.abs(rawInput) <= bandSize) {
+            return 0.0;
+        }
+        return rawInput;
     }
 }

@@ -6,6 +6,8 @@ import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.lib.OdometryData;
@@ -24,17 +26,32 @@ public class Sensors extends SubsystemBase {
      * - https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/external/samples/SensorOctoQuadAdv.java
      */
     private final OctoQuad octoQuad;
+    private final Telemetry mTelemetry;
 
     private boolean octoQuadReady = false;
     private OctoQuad.EncoderDataBlock encoderDataBlock;
 
-    public Sensors(HardwareMap hardwareMap, RevHubOrientationOnRobot gyroOrientation) {
+    public Sensors(HardwareMap hardwareMap, RevHubOrientationOnRobot gyroOrientation, Telemetry telemetry) {
         this.gyro = new RevIMU(hardwareMap);
         this.octoQuad = hardwareMap.get(OctoQuad.class, Constants.HardwareMapping.octoQuad);
+        this.mTelemetry = telemetry;
 
         this.octoQuadReady = false;
         this.gyro.init(gyroOrientation);
+        resetGyro();
         this.initializeOctoQuad();
+    }
+
+    @Override
+    public void periodic() {
+        OdometryData odomData = this.getOdometryData(true);
+        mTelemetry.addData("Sensors: L Odom Pos", odomData.leftOdometerPosition);
+        mTelemetry.addData("Sensors: R Odom Pos", odomData.rightOdometerPosition);
+        mTelemetry.addData("Sensors: P Odom Pos", odomData.perpendicularOdometerPosition);
+        mTelemetry.addData("Sensors: L Odom Vel", odomData.leftOdometerVelocity);
+        mTelemetry.addData("Sensors: R Odom Vel", odomData.rightOdometerVelocity);
+        mTelemetry.addData("Sensors: P Odom Vel", odomData.perpendicularOdometerVelocity);
+        mTelemetry.addData("Sensors: Gyro Heading", odomData.gyroHeading.getDegrees());
     }
 
     public void initializeOctoQuad() {
@@ -78,11 +95,18 @@ public class Sensors extends SubsystemBase {
     }
 
     /*
-     * Returns reads the gyro and OctoQuad sensors and returns current odometry data as
-     * an OdometryData object
+     * Returns current odometry data as an OdometryData object (without updating)
      */
     public OdometryData getOdometryData() {
-        readOctoQuadSensors();
+        return this.getOdometryData(false);
+    }
+
+    /*
+     * Returns current odometry data as an OdometryData object, refreshing
+     * that data from sensors when `refresh` is `true`
+     */
+    public OdometryData getOdometryData(boolean refresh) {
+        if (refresh) { readOctoQuadSensors(); }
         return new OdometryData(this.encoderDataBlock, this.gyro.getRotation2d());
     }
 
@@ -92,6 +116,14 @@ public class Sensors extends SubsystemBase {
      */
     public double getGyroHeadingDeg() {
         return this.gyro.getHeading();
+    }
+
+    /*
+     * Gets the current heading of the gyro in radians.
+     * This heading is offset from the last gyro reset.
+     */
+    public double getGyroHeadingRad() {
+        return this.gyro.getHeading(AngleUnit.RADIANS);
     }
 
     /*

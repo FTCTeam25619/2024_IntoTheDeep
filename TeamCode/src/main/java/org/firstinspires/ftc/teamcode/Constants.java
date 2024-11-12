@@ -3,6 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
+    public static final class RobotModes {
+        public static final boolean SLOW_DRIVE_MODE = false;
+        public static final boolean FIELD_CENTRIC_DRIVE = true;
+        public static final boolean FTCLIB_DRIVE_CONTROL = true;
+    }
     public static final class HardwareMapping{
         public static final String frontLeftWheel = "front_left_wheel";
         public static final String frontRightWheel = "front_right_wheel";
@@ -58,15 +63,16 @@ public final class Constants {
 
         // real achievable percentage of theoretical max drive speed
         public static final double ACHIEVABLE_MAX_DRIVE_SPEED_FACTOR = 0.90;
-        // joystick control deadzone for drive power (in polar coordinates) in meters per second
 
-        public static final double POWER_DEADZONE_THRESHOLD_MPS = 0.3;
+        // joystick control deadzone for drive power (in polar coordinates) in [-1,1] range
+        public static final double POWER_DEADZONE_THRESHOLD_RAW = 0.1 * Math.sqrt(2.0);
 
-        // joystick control deadzone for turn in radians per second;
-        public static final double TURN_DEADZONE_THRESHOLD_RPS = 0.02;
+        // joystick control deadzone for turn in [-1,1] range;
+        public static final double TURN_DEADZONE_THRESHOLD_RAW = 0.1;
 
-        public static final double TURN_SPEED_LIMIT_DPS = 0.5;
+        public static final double TURN_SPEED_LIMIT_DPS = 120.0;
         public static final double TURN_SPEED_LIMIT_RPS = TURN_SPEED_LIMIT_DPS * ConversionFactors.DEGREES_TO_RADIANS;
+        public static final double SLOW_DRIVE_MODE_FACTOR = 2.0;
     }
 
     public static final class DriveBase {

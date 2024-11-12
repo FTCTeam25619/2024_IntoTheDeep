@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.ftccommon.external.OnCreate;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -16,6 +16,8 @@ public class Drivetrain extends SubsystemBase {
     private Motor backLeftWheel;
     private Motor backRightWheel;
 
+    private MecanumDrive mecanumDrive;
+
     private Telemetry mTelemetry;
     private Sensors mSensors;
 
@@ -26,9 +28,14 @@ public class Drivetrain extends SubsystemBase {
         backRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.backRightWheel);
 
         frontLeftWheel.setInverted(true);
-        frontRightWheel.setInverted(true);
-        backRightWheel.setInverted(true);
-        backLeftWheel.setInverted(false);
+        frontRightWheel.setInverted(false);
+        backRightWheel.setInverted(false);
+        backLeftWheel.setInverted(true);
+
+        frontLeftWheel.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        frontRightWheel.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backRightWheel.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backLeftWheel.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         frontLeftWheel.setRunMode(Motor.RunMode.RawPower);
         frontRightWheel.setRunMode(Motor.RunMode.RawPower);
@@ -37,18 +44,27 @@ public class Drivetrain extends SubsystemBase {
 
         mSensors = sensors;
         mTelemetry = telemetry;
+
+        // Create the FTCLib MecanumDrive object that actually drives the wheel powers
+        // Only used for FTCLib drive mode.
+        boolean autoInvertRight = false;
+        mecanumDrive = new MecanumDrive(autoInvertRight, frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel);
     }
 
     @Override
     public void periodic() {
+        mTelemetry.addData("Field Centric", Constants.RobotModes.FIELD_CENTRIC_DRIVE);
+        mTelemetry.addData("FTCLib Drive Control", Constants.RobotModes.FTCLIB_DRIVE_CONTROL);
+        mTelemetry.addData("Slow Drive Mode", Constants.RobotModes.SLOW_DRIVE_MODE);
+
         OdometryData odomData = mSensors.getOdometryData();
-        mTelemetry.addData("L Odom Pos", odomData.leftOdometerPosition);
-        mTelemetry.addData("R Odom Pos", odomData.rightOdometerPosition);
-        mTelemetry.addData("P Odom Pos", odomData.perpendicularOdometerPosition);
-        mTelemetry.addData("L Odom Vel", odomData.leftOdometerVelocity);
-        mTelemetry.addData("R Odom Vel", odomData.rightOdometerVelocity);
-        mTelemetry.addData("P Odom Vel", odomData.perpendicularOdometerVelocity);
-        mTelemetry.addData("Gyro Heading", odomData.gyroHeading.getDegrees());
+        mTelemetry.addData("Dt: L Odom Pos", odomData.leftOdometerPosition);
+        mTelemetry.addData("Dt: R Odom Pos", odomData.rightOdometerPosition);
+        mTelemetry.addData("Dt: P Odom Pos", odomData.perpendicularOdometerPosition);
+        mTelemetry.addData("Dt: L Odom Vel", odomData.leftOdometerVelocity);
+        mTelemetry.addData("Dt: R Odom Vel", odomData.rightOdometerVelocity);
+        mTelemetry.addData("Dt: P Odom Vel", odomData.perpendicularOdometerVelocity);
+        mTelemetry.addData("Dt: Gyro Heading", odomData.gyroHeading.getDegrees());
     }
 
     public void stopDrive(){
@@ -58,31 +74,89 @@ public class Drivetrain extends SubsystemBase {
         backRightWheel.set(0.0);
     }
 
-    public void driveRobot(double power, double theta, double turn){
-        double sinTheta = Math.sin(theta - Math.PI/4);
-        double cosTheta = Math.cos(theta - Math.PI/4);
-        double max = Math.max( Math.abs(sinTheta), Math.abs(cosTheta));
-        sinTheta = sinTheta/max;
-        cosTheta = cosTheta/max;
 
-        double leftFront = power * cosTheta + turn;
-        double rightFront = power * sinTheta - turn;
-        double leftRear = power * sinTheta + turn;
-        double rightRear = power * cosTheta - turn;
-        double scaling = power + Math.abs(turn);
-
-        if (scaling > 1){
-            leftFront /= scaling;
-            rightFront /= scaling;
-            leftRear /= scaling;
-            rightFront /= scaling;
-
+    /*
+     * Method to drive the robot open loop field centric based on a directional
+     * vector and turn input. Expected inputs are calculated power and angle
+     * theta from joystick raw input and turn as joystick raw input.
+     * Theta angle is counter-rotated against the gyro heading to compute the
+     * correct drive angle.
+     * Deadband and smoothing is expected to be already applied.
+     */
+    public void driveRobotFieldCentric(double power, double theta, double turn) {
+        if (Constants.RobotModes.FTCLIB_DRIVE_CONTROL) {
+            double strafeSpeed = power * Math.sin(theta);
+            double forwardSpeed = power * Math.cos(theta);
+            double gyroHeading = mSensors.getGyroHeadingDeg();
+            this.mecanumDrive.driveFieldCentric(-strafeSpeed, forwardSpeed, -turn, gyroHeading);
+        } else {
+            double adjustedTheta = theta - mSensors.getGyroHeadingRad();
+            driveRobot(power, adjustedTheta, turn);
         }
+    }
 
-        frontLeftWheel.set(leftFront);
-        frontRightWheel.set(rightFront);
-        backLeftWheel.set(leftRear);
-        backRightWheel.set(rightRear);
+    /*
+     * Method to drive the robot open loop based on a directional vector and turn input.
+     * Expected inputs are calculated power and angle theta from joystick raw input
+     * and turn as joystick raw input. Deadband and smoothing is expected to be already
+     * applied. This is robot-centric drive only.
+     */
+    public void driveRobot(double power, double theta, double turn){
+        if (Constants.RobotModes.FTCLIB_DRIVE_CONTROL) {
+            double strafeSpeed = power * Math.sin(theta);
+            double forwardSpeed = power * Math.cos(theta);
+            this.mecanumDrive.driveRobotCentric(-strafeSpeed, forwardSpeed, -turn);
+        } else {
+            // Rotate theta + pi/4 because + pi/2 for coord rotation, - pi/4 for roller angle
+            double sinTheta = Math.sin(-theta + Math.PI/4);
+            double cosTheta = Math.cos(-theta + Math.PI/4);
+
+            mTelemetry.addData("sin(theta)", sinTheta);
+            mTelemetry.addData("cos(theta)", cosTheta);
+
+            // Rescale power to account for max sqrt(2)/2 on pi/4 at 0 angle.
+            power = power * Math.sqrt(2.0);
+
+            double leftFront = power * sinTheta - turn;
+            double rightFront = power * cosTheta + turn;
+            double leftRear = power * cosTheta - turn;
+            double rightRear = power * sinTheta + turn;
+
+            mTelemetry.addData("LF power (prescale)", leftFront);
+            mTelemetry.addData("RF power (prescale)", rightFront);
+            mTelemetry.addData("LR power (prescale)", leftRear);
+            mTelemetry.addData("RR power (prescale)", rightRear);
+
+            double scaling = Math.max(
+                    Math.max(
+                        Math.abs(leftFront),
+                        Math.abs(rightFront)
+                    ),
+                    Math.max(
+                        Math.abs(leftRear),
+                        Math.abs(rightRear)
+                    )
+            );
+
+            mTelemetry.addData("Scaling factor", scaling);
+
+            if (scaling > 1.0){
+                leftFront /= scaling;
+                rightFront /= scaling;
+                leftRear /= scaling;
+                rightRear /= scaling;
+            }
+
+            mTelemetry.addData("LF power (final)", leftFront);
+            mTelemetry.addData("RF power (final)", rightFront);
+            mTelemetry.addData("LR power (final)", leftRear);
+            mTelemetry.addData("RR power (final)", rightRear);
+
+            frontLeftWheel.set(leftFront);
+            frontRightWheel.set(rightFront);
+            backLeftWheel.set(leftRear);
+            backRightWheel.set(rightRear);
+        }
     }
 }
 
