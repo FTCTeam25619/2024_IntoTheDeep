@@ -4,9 +4,7 @@ import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
     public static final class RobotModes {
-        public static final boolean SLOW_DRIVE_MODE = true;
-        public static final boolean FIELD_CENTRIC_DRIVE = true;
-        public static final boolean FTCLIB_DRIVE_CONTROL = true;
+        public static final boolean DEBUG_TELEMETRY = false;
     }
     public static final class HardwareMapping{
         public static final String frontLeftWheel = "front_left_wheel";
@@ -72,7 +70,8 @@ public final class Constants {
 
         public static final double TURN_SPEED_LIMIT_DPS = 120.0;
         public static final double TURN_SPEED_LIMIT_RPS = TURN_SPEED_LIMIT_DPS * ConversionFactors.DEGREES_TO_RADIANS;
-        public static final double SLOW_DRIVE_MODE_FACTOR = 1.3;
+        public static final double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
+        public static final double SLOW_DRIVE_MODE_TURN_FACTOR = 2.5;
     }
 
     public static final class DriveBase {
