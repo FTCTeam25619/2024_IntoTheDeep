@@ -3,9 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
+
+    public static final class DebugModes {
+        public static final boolean ENABLE_FTC_DASHBOARD = true;
+    }
+
     public static final class RobotModes {
         public static final boolean DEBUG_TELEMETRY = false;
     }
+
     public static final class HardwareMapping{
         public static final String frontLeftWheel = "front_left_wheel";
         public static final String frontRightWheel = "front_right_wheel";
