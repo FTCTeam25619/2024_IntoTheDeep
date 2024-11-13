@@ -54,9 +54,11 @@ public class DriveRobot extends CommandBase {
         double power = Math.hypot(y, x);
         double theta = -Math.atan2(y, x);
         power = this.prepareDriveInputs(power,
-                Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW);
+                Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW,
+                Constants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
         turn = this.prepareDriveInputs(turn,
-                Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW);
+                Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
+                Constants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
 
         mTelemetry.addData("Drive power final", power);
         mTelemetry.addData("Drive angle final", theta);
@@ -86,11 +88,11 @@ public class DriveRobot extends CommandBase {
      *     and will clamp the inputs to that range if outside)
      *   - Applying scaling for slow mode as needed
      */
-    private double prepareDriveInputs(double input, double deadBandSize) {
+    private double prepareDriveInputs(double input, double deadBandSize, double slowModeFactor) {
         double prepared = DriveHelpers.deadBandJoystick(input, deadBandSize);
         prepared = DriveHelpers.smoothJoystick(prepared);
         if (mRobotState.slowDriveMode) {
-            prepared /= Constants.DriveControl.SLOW_DRIVE_MODE_FACTOR;
+            prepared /= slowModeFactor;
         }
         return prepared;
     }

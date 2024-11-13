@@ -73,7 +73,7 @@ public class Robot2024 extends Robot {
         c1LeftBumper.whenPressed(new InstantCommand(() -> robotState.setSlowDriveMode(true)));
         c1LeftBumper.whenReleased(new InstantCommand(() -> robotState.setSlowDriveMode(false)));
 
-        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
-        c1Back.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
+        GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
+        c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
     }
 }

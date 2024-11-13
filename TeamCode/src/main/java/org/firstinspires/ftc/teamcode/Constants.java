@@ -70,7 +70,8 @@ public final class Constants {
 
         public static final double TURN_SPEED_LIMIT_DPS = 120.0;
         public static final double TURN_SPEED_LIMIT_RPS = TURN_SPEED_LIMIT_DPS * ConversionFactors.DEGREES_TO_RADIANS;
-        public static final double SLOW_DRIVE_MODE_FACTOR = 1.3;
+        public static final double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
+        public static final double SLOW_DRIVE_MODE_TURN_FACTOR = 2.5;
     }
 
     public static final class DriveBase {

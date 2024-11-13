@@ -57,6 +57,10 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
+        mTelemetry.addData("RobotState: SLOW MODE", mRobotState.slowDriveMode);
+        mTelemetry.addData("RobotState: FIELD CENTRIC", mRobotState.robotDriveMode.fieldCentric);
+        mTelemetry.addData("RobotState: FTCLIB DRIVE CODE", mRobotState.robotDriveMode.ftcLibDriveControl);
+        
         OdometryData odomData = mSensors.getOdometryData();
         mTelemetry.addData("Dt: L Odom Pos", odomData.leftOdometerPosition);
         mTelemetry.addData("Dt: R Odom Pos", odomData.rightOdometerPosition);
