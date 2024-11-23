@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.accessibilityservice.GestureDescription;
+
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
@@ -18,6 +20,9 @@ public final class Constants {
         public static final String backLeftWheel = "back_left_wheel";
         public static final String backRightWheel = "back_right_wheel";
         public static final String octoQuad = "octoquad";
+        public static final String liftLeftMotor = "lift_left";
+        public static final String liftRightMotor = "lift_right";
+        public static final String liftAbsoluteEncoder = "lift_abs_enc";
     }
 
     public static final class OctoQuad {
@@ -51,6 +56,7 @@ public final class Constants {
         public static final double METERS_TO_FEET = 1.0 / FEET_TO_METERS;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
         public static final double RADIANS_TO_DEGREES = 180.0 / Math.PI;
+        public static final double LIFT_VOLTAGE_TO_CM = 1.0;
     }
 
     public static final class SensorRates {

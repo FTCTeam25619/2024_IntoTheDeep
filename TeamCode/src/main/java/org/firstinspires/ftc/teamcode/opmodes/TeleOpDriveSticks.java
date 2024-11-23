@@ -22,7 +22,7 @@ public class TeleOpDriveSticks  extends OpMode {
             telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         }
 
-        robot = new Robot2024(hardwareMap, gamepad1,telemetry, OpModeSelection.DRIVE_STICKS_TELEOP);
+        robot = new Robot2024(hardwareMap, gamepad1, gamepad2, telemetry, OpModeSelection.DRIVE_STICKS_TELEOP);
 
         telemetry.addData("Robot Status", "Initializing TeleOpDriveSticks");
     }
