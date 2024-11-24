@@ -16,6 +16,10 @@ public class Lift extends SubsystemBase{
 
     private Telemetry mTelemetry;
 
+    // TODO: This is currently volts -- should actually be cm.
+    public double minPositionCM = 1.5;
+    public double maxPositionCM = 3.0;
+
     public Lift(HardwareMap hardwareMap, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftLeftMotor);
         rightMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftRightMotor);
@@ -33,8 +37,6 @@ public class Lift extends SubsystemBase{
 
 
         mTelemetry = telemetry;
-
-
     }
 
     @Override
@@ -53,6 +55,10 @@ public class Lift extends SubsystemBase{
 
         leftMotor.set(power);
         rightMotor.set(power);
+    }
 
+    public void stopMotors() {
+        leftMotor.set(0.0);
+        rightMotor.set(0.0);
     }
 }

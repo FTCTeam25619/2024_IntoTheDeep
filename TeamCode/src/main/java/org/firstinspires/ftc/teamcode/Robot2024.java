@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
+import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
+import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
@@ -84,6 +86,7 @@ public class Robot2024 extends Robot {
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
 
-        c2DPadUp.whileHeld(new InstantCommand());
+        c2DPadUp.whileHeld(new MoveLiftUp(lift));
+        c2DPadDown.whileHeld(new MoveLiftDown(lift));
     }
 }
