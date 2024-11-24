@@ -25,7 +25,7 @@ public class Sensors extends SubsystemBase {
      * - https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/external/samples/SensorOctoQuad.java
      * - https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/external/samples/SensorOctoQuadAdv.java
      */
-//    private final OctoQuad octoQuad;
+    private final OctoQuad octoQuad;
     private final Telemetry mTelemetry;
 
     private boolean octoQuadReady = false;
@@ -33,7 +33,7 @@ public class Sensors extends SubsystemBase {
 
     public Sensors(HardwareMap hardwareMap, RevHubOrientationOnRobot gyroOrientation, Telemetry telemetry) {
         this.gyro = new RevIMU(hardwareMap);
-//        this.octoQuad = hardwareMap.get(OctoQuad.class, Constants.HardwareMapping.octoQuad);
+        this.octoQuad = hardwareMap.get(OctoQuad.class, Constants.HardwareMapping.octoQuad);
         this.mTelemetry = telemetry;
 
         this.octoQuadReady = false;
@@ -55,31 +55,31 @@ public class Sensors extends SubsystemBase {
     }
 
     public void initializeOctoQuad() {
-//        // Reverse the count-direction of any encoder that is incorrect.
-//        // e.g. if you push the robot forward and the left encoder counts down, then reverse it so it counts up.
-//        this.octoQuad.setSingleEncoderDirection(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
-//                OctoQuad.EncoderDirection.REVERSE);
-//        this.octoQuad.setSingleEncoderDirection(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
-//                OctoQuad.EncoderDirection.FORWARD);
-//        this.octoQuad.setSingleEncoderDirection(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
-//                OctoQuad.EncoderDirection.FORWARD);
-//
-//        // Set sample rates for velocity reads from OctoQuad channels
-//        this.octoQuad.setSingleVelocitySampleInterval(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
-//                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
-//        this.octoQuad.setSingleVelocitySampleInterval(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
-//                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
-//        this.octoQuad.setSingleVelocitySampleInterval(
-//                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
-//                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
-//
-//        // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
-//        this.octoQuad.saveParametersToFlash();
+        // Reverse the count-direction of any encoder that is incorrect.
+        // e.g. if you push the robot forward and the left encoder counts down, then reverse it so it counts up.
+        this.octoQuad.setSingleEncoderDirection(
+                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
+                OctoQuad.EncoderDirection.REVERSE);
+        this.octoQuad.setSingleEncoderDirection(
+                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
+                OctoQuad.EncoderDirection.FORWARD);
+        this.octoQuad.setSingleEncoderDirection(
+                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
+                OctoQuad.EncoderDirection.FORWARD);
+
+        // Set sample rates for velocity reads from OctoQuad channels
+        this.octoQuad.setSingleVelocitySampleInterval(
+                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
+                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+        this.octoQuad.setSingleVelocitySampleInterval(
+                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
+                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+        this.octoQuad.setSingleVelocitySampleInterval(
+                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
+                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+
+        // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
+        this.octoQuad.saveParametersToFlash();
         this.encoderDataBlock = new OctoQuad.EncoderDataBlock();
         this.octoQuadReady = true;
     }
@@ -88,11 +88,11 @@ public class Sensors extends SubsystemBase {
      * Takes a reading of all OctoQuad encoder data channels and stores the data in
      * the encoderDataBlock instance variable
      */
-//    public void readOctoQuadSensors() {
-//        if (this.octoQuadReady) {
-//            this.octoQuad.readAllEncoderData(this.encoderDataBlock);
-//        }
-//    }
+    public void readOctoQuadSensors() {
+        if (this.octoQuadReady) {
+            this.octoQuad.readAllEncoderData(this.encoderDataBlock);
+        }
+    }
 
     /*
      * Returns current odometry data as an OdometryData object (without updating)
@@ -106,7 +106,7 @@ public class Sensors extends SubsystemBase {
      * that data from sensors when `refresh` is `true`
      */
     public OdometryData getOdometryData(boolean refresh) {
-//        if (refresh) { readOctoQuadSensors(); }
+        if (refresh) { readOctoQuadSensors(); }
         return new OdometryData(this.encoderDataBlock, this.gyro.getRotation2d());
     }
 
