@@ -7,20 +7,20 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.opmodes.TeleOpDriveSticks;
 
 public class Lift extends SubsystemBase{
     private Motor leftMotor;
     private Motor rightMotor;
     private AnalogInput absoluteEncoder;
 
+    private Sensors mSensors;
     private Telemetry mTelemetry;
 
     // TODO: This is currently volts -- should actually be cm.
     public double minPositionCM = 1.5;
     public double maxPositionCM = 3.0;
 
-    public Lift(HardwareMap hardwareMap, Telemetry telemetry){
+    public Lift(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftLeftMotor);
         rightMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftRightMotor);
         absoluteEncoder = hardwareMap.get(AnalogInput.class, Constants.HardwareMapping.liftAbsoluteEncoder);
@@ -34,15 +34,15 @@ public class Lift extends SubsystemBase{
         leftMotor.setRunMode(Motor.RunMode.RawPower);
         rightMotor.setRunMode(Motor.RunMode.RawPower);
 
-
-
+        mSensors = sensors;
         mTelemetry = telemetry;
     }
 
     @Override
     public void periodic() {
-        mTelemetry.addData("Lift: Position", getPositionCM());
-
+        mTelemetry.addData("Lift: Pos cm", getPositionCM());
+        mTelemetry.addData("Lift: L Enc", mSensors.getLiftLeftEncoderCount());
+        mTelemetry.addData("Lift: R Enc", mSensors.getLiftRightEncoderCount());
     }
 
     public double getPositionCM(){

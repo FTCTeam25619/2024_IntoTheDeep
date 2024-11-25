@@ -59,7 +59,7 @@ public class Robot2024 extends Robot {
         // Subsystems
         sensors = new Sensors(hardwareMap, gyroOrientation, Robot2024.telemetry);
         drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
-        lift = new Lift(hardwareMap, Robot2024.telemetry);
+        lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
 
         // Controllers
         controller1 = new GamepadEx(gamepad1);

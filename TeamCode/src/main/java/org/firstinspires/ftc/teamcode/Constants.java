@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.accessibilityservice.GestureDescription;
-
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public final class Constants {
@@ -30,22 +28,25 @@ public final class Constants {
          * Identify which encoder OctoQuad input channels are connected to each sensor and what type they are.
          */
         public enum SensorType {
+            MotorEncoder,
             OdometryPod;
         }
 
         public enum OctoQuadChannel {
+            LiftLeftEncoder(0, SensorType.MotorEncoder),
+            LiftRightEncoder(1, SensorType.MotorEncoder),
             // Odometry pod facing forward direction on left side of robot (Axial motion)
-            OdometryLeft(0, SensorType.OdometryPod),
+            OdometryLeft(2, SensorType.OdometryPod),
             // Odometry pod facing forward direction on right side of robot (Axial motion)
-            OdometryRight(1, SensorType.OdometryPod),
+            OdometryRight(3, SensorType.OdometryPod),
             // Odometry pod facing perpendicular direction at the center of the robot (Lateral motion)
-            OdometryPerp(2, SensorType.OdometryPod);
+            OdometryPerp(4, SensorType.OdometryPod);
 
-            public final int channel;
+            public final int channelId;
             public final SensorType type;
 
             private OctoQuadChannel(int channelId, SensorType type) {
-                this.channel = channelId;
+                this.channelId = channelId;
                 this.type = type;
             }
         }
