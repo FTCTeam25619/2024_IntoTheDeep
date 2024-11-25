@@ -10,10 +10,6 @@ public final class DriveHelpers {
         return new ChassisSpeeds(0.0, 0.0, 0.0);
     }
 
-    public static double odometryRawToMeters(double ticks) {
-        return ticks * 2.0 * Math.PI * Constants.DriveBase.WHEEL_RADIUS_MM / 1000.0;
-    }
-
     public static double smoothJoystick(double rawInput) {
         double clamped = rawInput;
         if (Math.abs(rawInput) > 1.0) {

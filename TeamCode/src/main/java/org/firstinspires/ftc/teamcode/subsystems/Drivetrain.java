@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.os.SystemClock;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -7,10 +9,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Constants.HardwareMapping;
 import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
-import org.firstinspires.ftc.teamcode.lib.OdometryData;
 
 public class Drivetrain extends SubsystemBase {
     private Motor frontLeftWheel;
@@ -25,10 +26,10 @@ public class Drivetrain extends SubsystemBase {
     private Sensors mSensors;
 
     public Drivetrain(HardwareMap hardwareMap, Sensors sensors, RobotState robotState, Telemetry telemetry) {
-        frontLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontLeftWheel);
-        frontRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.frontRightWheel);
-        backLeftWheel = new Motor(hardwareMap, Constants.HardwareMapping.backLeftWheel);
-        backRightWheel = new Motor(hardwareMap, Constants.HardwareMapping.backRightWheel);
+        frontLeftWheel = new Motor(hardwareMap, HardwareMapping.frontLeftWheel);
+        frontRightWheel = new Motor(hardwareMap, HardwareMapping.frontRightWheel);
+        backLeftWheel = new Motor(hardwareMap, HardwareMapping.backLeftWheel);
+        backRightWheel = new Motor(hardwareMap, HardwareMapping.backRightWheel);
 
         frontLeftWheel.setInverted(true);
         frontRightWheel.setInverted(false);
@@ -60,15 +61,13 @@ public class Drivetrain extends SubsystemBase {
         mTelemetry.addData("RobotState: SLOW MODE", mRobotState.slowDriveMode);
         mTelemetry.addData("RobotState: FIELD CENTRIC", mRobotState.robotDriveMode.fieldCentric);
         mTelemetry.addData("RobotState: FTCLIB DRIVE CODE", mRobotState.robotDriveMode.ftcLibDriveControl);
-        
-        OdometryData odomData = mSensors.getOdometryData();
-        mTelemetry.addData("Dt: L Odom Pos", odomData.leftOdometerPosition);
-        mTelemetry.addData("Dt: R Odom Pos", odomData.rightOdometerPosition);
-        mTelemetry.addData("Dt: P Odom Pos", odomData.perpendicularOdometerPosition);
-        mTelemetry.addData("Dt: L Odom Vel", odomData.leftOdometerVelocity);
-        mTelemetry.addData("Dt: R Odom Vel", odomData.rightOdometerVelocity);
-        mTelemetry.addData("Dt: P Odom Vel", odomData.perpendicularOdometerVelocity);
-        mTelemetry.addData("Dt: Gyro Heading", odomData.gyroHeading.getDegrees());
+
+        mTelemetry.addData("Dt: Odom Elapsed ns", SystemClock.elapsedRealtimeNanos() - mSensors.odomTimestampNanos);
+        mTelemetry.addData("Dt: Odom Read TS ns", mSensors.odomTimestampNanos);
+        mTelemetry.addData("Dt: L Odom Pos m", mSensors.odomLeftDistanceMeters);
+        mTelemetry.addData("Dt: R Odom Pos m", mSensors.odomRightDistanceMeters);
+        mTelemetry.addData("Dt: P Odom Pos m", mSensors.odomPerpDistanceMeters);
+        mTelemetry.addData("Dt: Gyro Heading", mSensors.gyroHeadingDegrees);
     }
 
     public void stopDrive(){

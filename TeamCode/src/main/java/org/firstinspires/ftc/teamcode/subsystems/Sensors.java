@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.os.SystemClock;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.lib.OdometryData;
 import org.firstinspires.ftc.teamcode.lib.RevIMU;
 
 public class Sensors extends SubsystemBase {
@@ -26,14 +27,47 @@ public class Sensors extends SubsystemBase {
      * - https://github.com/FIRST-Tech-Challenge/FtcRobotController/blob/master/FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/external/samples/SensorOctoQuadAdv.java
      */
     private final OctoQuad octoQuad;
+
+    private final Motor odomLeftMotor;
+    private final Motor odomRightMotor;
+    private final Motor odomPerpMotor;
+    private final Motor.Encoder odomLeft;
+    private final Motor.Encoder odomRight;
+    private final Motor.Encoder odomPerp;
     private final Telemetry mTelemetry;
 
-    private boolean octoQuadReady = false;
+    // These variables are here to cache values each cycle
+    // allowing for a single (mostly) synchronized read from
+    // the sensors but multiple retrieval
+    public double odomLeftDistanceMeters;
+    public double odomRightDistanceMeters;
+    public double odomPerpDistanceMeters;
+    public double gyroHeadingDegrees;
+    public long odomTimestampNanos;
     private OctoQuad.EncoderDataBlock encoderDataBlock;
+    public double liftLeftEncoderPosition;
+    public double liftRightEncoderPosition;
+
+    private boolean octoQuadReady = false;
 
     public Sensors(HardwareMap hardwareMap, RevHubOrientationOnRobot gyroOrientation, Telemetry telemetry) {
         this.gyro = new RevIMU(hardwareMap);
         this.octoQuad = hardwareMap.get(OctoQuad.class, Constants.HardwareMapping.octoQuad);
+        this.odomLeftMotor = new Motor(hardwareMap, Constants.HardwareMapping.leftOdometryPod);
+        this.odomRightMotor = new Motor(hardwareMap, Constants.HardwareMapping.rightOdometryPod);
+        this.odomPerpMotor = new Motor(hardwareMap, Constants.HardwareMapping.perpOdometryPod);
+        this.odomLeft = this.odomLeftMotor.encoder;
+        this.odomRight = this.odomRightMotor.encoder;
+        this.odomPerp = this.odomPerpMotor.encoder;
+
+        this.odomLeft.setDirection(Motor.Direction.REVERSE);
+        this.odomRight.setDirection(Motor.Direction.FORWARD);
+        this.odomPerp.setDirection(Motor.Direction.FORWARD);
+
+        this.odomLeft.setDistancePerPulse(2.0 * Math.PI * Constants.DriveBase.WHEEL_RADIUS_MM / 1000.0);
+        this.odomRight.setDistancePerPulse(2.0 * Math.PI * Constants.DriveBase.WHEEL_RADIUS_MM / 1000.0);
+        this.odomPerp.setDistancePerPulse(2.0 * Math.PI * Constants.DriveBase.WHEEL_RADIUS_MM / 1000.0);
+
         this.mTelemetry = telemetry;
 
         this.octoQuadReady = false;
@@ -44,40 +78,33 @@ public class Sensors extends SubsystemBase {
 
     @Override
     public void periodic() {
-        OdometryData odomData = this.getOdometryData(true);
-        mTelemetry.addData("Sensors: L Lift Enc", getLiftLeftEncoderCount());
-        mTelemetry.addData("Sensors: R Lift Enc", getLiftRightEncoderCount());
-        mTelemetry.addData("Sensors: L Odom Pos", odomData.leftOdometerPosition);
-        mTelemetry.addData("Sensors: R Odom Pos", odomData.rightOdometerPosition);
-        mTelemetry.addData("Sensors: P Odom Pos", odomData.perpendicularOdometerPosition);
-        mTelemetry.addData("Sensors: L Odom Vel", odomData.leftOdometerVelocity);
-        mTelemetry.addData("Sensors: R Odom Vel", odomData.rightOdometerVelocity);
-        mTelemetry.addData("Sensors: P Odom Vel", odomData.perpendicularOdometerVelocity);
-        mTelemetry.addData("Sensors: Gyro Heading", odomData.gyroHeading.getDegrees());
+        readOctoQuadSensors();
+        readOdometrySensors();
+        mTelemetry.addData("Sensors: L Lift Enc", liftLeftEncoderPosition);
+        mTelemetry.addData("Sensors: R Lift Enc", liftRightEncoderPosition);
+        mTelemetry.addData("Sensors: L Odom Pos m", odomLeftDistanceMeters);
+        mTelemetry.addData("Sensors: R Odom Pos m", odomRightDistanceMeters);
+        mTelemetry.addData("Sensors: P Odom Pos m", odomPerpDistanceMeters);
+        mTelemetry.addData("Sensors: Gyro Heading deg", gyroHeadingDegrees);
+        mTelemetry.addData("Sensors: Odom TS ns", odomTimestampNanos);
     }
 
     public void initializeOctoQuad() {
         // Reverse the count-direction of any encoder that is incorrect.
         // e.g. if you push the robot forward and the left encoder counts down, then reverse it so it counts up.
         this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channelId,
-                OctoQuad.EncoderDirection.REVERSE);
-        this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channelId,
+                Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder.channelId,
                 OctoQuad.EncoderDirection.FORWARD);
         this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channelId,
+                Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder.channelId,
                 OctoQuad.EncoderDirection.FORWARD);
 
         // Set sample rates for velocity reads from OctoQuad channels
         this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channelId,
+                Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder.channelId,
                 Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
         this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channelId,
-                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
-        this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channelId,
+                Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder.channelId,
                 Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
 
         // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
@@ -93,35 +120,21 @@ public class Sensors extends SubsystemBase {
     public void readOctoQuadSensors() {
         if (this.octoQuadReady) {
             this.octoQuad.readAllEncoderData(this.encoderDataBlock);
+            this.liftLeftEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder);
+            this.liftRightEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder);
         }
+    }
+
+    public void readOdometrySensors() {
+        this.odomTimestampNanos = SystemClock.elapsedRealtimeNanos();
+        this.odomLeftDistanceMeters = this.odomLeft.getDistance();
+        this.odomRightDistanceMeters = this.odomRight.getDistance();
+        this.odomPerpDistanceMeters = this.odomPerp.getDistance();
+        this.gyroHeadingDegrees = this.gyro.getHeading(AngleUnit.DEGREES);
     }
 
     private double getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel channel) {
         return this.encoderDataBlock.positions[channel.channelId];
-    }
-
-    public double getLiftLeftEncoderCount() {
-        return this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder);
-    }
-
-    public double getLiftRightEncoderCount() {
-        return this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder);
-    }
-
-    /*
-     * Returns current odometry data as an OdometryData object (without updating)
-     */
-    public OdometryData getOdometryData() {
-        return this.getOdometryData(false);
-    }
-
-    /*
-     * Returns current odometry data as an OdometryData object, refreshing
-     * that data from sensors when `refresh` is `true`
-     */
-    public OdometryData getOdometryData(boolean refresh) {
-        if (refresh) { readOctoQuadSensors(); }
-        return new OdometryData(this.encoderDataBlock, this.gyro.getRotation2d());
     }
 
     /*
