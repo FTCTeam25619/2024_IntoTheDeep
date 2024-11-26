@@ -17,7 +17,7 @@ public class Lift extends SubsystemBase{
     private Telemetry mTelemetry;
 
     // TODO: This is currently volts -- should actually be cm.
-    public double minPositionCM = 1.5;
+    public double minPositionCM = 0.5;
     public double maxPositionCM = 3.0;
 
     public Lift(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
@@ -41,8 +41,8 @@ public class Lift extends SubsystemBase{
     @Override
     public void periodic() {
         mTelemetry.addData("Lift: Pos cm", getPositionCM());
-        mTelemetry.addData("Lift: L Enc", mSensors.getLiftLeftEncoderCount());
-        mTelemetry.addData("Lift: R Enc", mSensors.getLiftRightEncoderCount());
+        mTelemetry.addData("Lift: L Enc", mSensors.liftLeftEncoderPosition);
+        mTelemetry.addData("Lift: R Enc", mSensors.liftRightEncoderPosition);
     }
 
     public double getPositionCM(){
