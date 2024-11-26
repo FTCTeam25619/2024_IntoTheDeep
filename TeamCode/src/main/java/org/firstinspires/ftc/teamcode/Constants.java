@@ -21,6 +21,9 @@ public final class Constants {
         public static final String liftLeftMotor = "lift_left";
         public static final String liftRightMotor = "lift_right";
         public static final String liftAbsoluteEncoder = "lift_abs_enc";
+        public static final String leftOdometryPod = liftLeftMotor;
+        public static final String rightOdometryPod = liftRightMotor;
+        public static final String perpOdometryPod = "odom_perp";
     }
 
     public static final class OctoQuad {
