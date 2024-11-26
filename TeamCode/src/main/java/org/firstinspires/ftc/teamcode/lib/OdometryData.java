@@ -7,10 +7,6 @@ import com.qualcomm.hardware.digitalchickenlabs.OctoQuad.EncoderDataBlock;
 
 import org.firstinspires.ftc.teamcode.Constants.OctoQuad.OctoQuadChannel;
 
-import java.util.function.DoubleFunction;
-import java.util.function.DoubleSupplier;
-import java.util.function.Function;
-
 public final class OdometryData {
     public double leftOdometerPosition;
     public double rightOdometerPosition;
@@ -22,17 +18,17 @@ public final class OdometryData {
 
     public OdometryData(EncoderDataBlock encoderData, Rotation2d gyroHeading) {
         this.leftOdometerPosition = DriveHelpers.odometryRawToMeters(
-                encoderData.positions[OctoQuadChannel.OdometryLeft.channel]);
+                encoderData.positions[OctoQuadChannel.OdometryLeft.channelId]);
         this.rightOdometerPosition = DriveHelpers.odometryRawToMeters(
-                encoderData.positions[OctoQuadChannel.OdometryRight.channel]);
+                encoderData.positions[OctoQuadChannel.OdometryRight.channelId]);
         this.perpendicularOdometerPosition = DriveHelpers.odometryRawToMeters(
-                encoderData.positions[OctoQuadChannel.OdometryPerp.channel]);
+                encoderData.positions[OctoQuadChannel.OdometryPerp.channelId]);
         this.leftOdometerVelocity = DriveHelpers.odometryRawToMeters(
-                encoderData.velocities[OctoQuadChannel.OdometryLeft.channel]);
+                encoderData.velocities[OctoQuadChannel.OdometryLeft.channelId]);
         this.rightOdometerVelocity = DriveHelpers.odometryRawToMeters(
-                encoderData.velocities[OctoQuadChannel.OdometryRight.channel]);
+                encoderData.velocities[OctoQuadChannel.OdometryRight.channelId]);
         this.perpendicularOdometerVelocity = DriveHelpers.odometryRawToMeters(
-                encoderData.velocities[OctoQuadChannel.OdometryPerp.channel]);
+                encoderData.velocities[OctoQuadChannel.OdometryPerp.channelId]);
         this.gyroHeading = gyroHeading;
     }
 }

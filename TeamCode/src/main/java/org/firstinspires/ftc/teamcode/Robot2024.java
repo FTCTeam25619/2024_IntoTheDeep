@@ -13,8 +13,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
+import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
+import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
+import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 
 
@@ -29,14 +32,16 @@ import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 public class Robot2024 extends Robot {
     private final RobotState robotState;
     private final GamepadEx controller1;
+    private final GamepadEx controller2;
     private final Sensors sensors;
     private final Drivetrain drivetrain;
+    private final Lift lift;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
     private final OpModeSelection selectedOpMode;
 
-    public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Telemetry telemetry, OpModeSelection opModeSelection) {
+    public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, OpModeSelection opModeSelection) {
         // OpMode selection
         selectedOpMode = opModeSelection;
 
@@ -54,9 +59,11 @@ public class Robot2024 extends Robot {
         // Subsystems
         sensors = new Sensors(hardwareMap, gyroOrientation, Robot2024.telemetry);
         drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
+        lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
 
         // Controllers
         controller1 = new GamepadEx(gamepad1);
+        controller2 = new GamepadEx(gamepad2);
     }
 
     public void initOpMode() {
@@ -75,5 +82,11 @@ public class Robot2024 extends Robot {
 
         GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
         c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
+
+        GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
+        GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
+
+        c2DPadUp.whileHeld(new MoveLiftUp(lift));
+        c2DPadDown.whileHeld(new MoveLiftDown(lift));
     }
 }

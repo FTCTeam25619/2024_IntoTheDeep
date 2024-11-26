@@ -18,6 +18,9 @@ public final class Constants {
         public static final String backLeftWheel = "back_left_wheel";
         public static final String backRightWheel = "back_right_wheel";
         public static final String octoQuad = "octoquad";
+        public static final String liftLeftMotor = "lift_left";
+        public static final String liftRightMotor = "lift_right";
+        public static final String liftAbsoluteEncoder = "lift_abs_enc";
     }
 
     public static final class OctoQuad {
@@ -25,22 +28,25 @@ public final class Constants {
          * Identify which encoder OctoQuad input channels are connected to each sensor and what type they are.
          */
         public enum SensorType {
+            MotorEncoder,
             OdometryPod;
         }
 
         public enum OctoQuadChannel {
+            LiftLeftEncoder(0, SensorType.MotorEncoder),
+            LiftRightEncoder(1, SensorType.MotorEncoder),
             // Odometry pod facing forward direction on left side of robot (Axial motion)
-            OdometryLeft(0, SensorType.OdometryPod),
+            OdometryLeft(2, SensorType.OdometryPod),
             // Odometry pod facing forward direction on right side of robot (Axial motion)
-            OdometryRight(1, SensorType.OdometryPod),
+            OdometryRight(3, SensorType.OdometryPod),
             // Odometry pod facing perpendicular direction at the center of the robot (Lateral motion)
-            OdometryPerp(2, SensorType.OdometryPod);
+            OdometryPerp(4, SensorType.OdometryPod);
 
-            public final int channel;
+            public final int channelId;
             public final SensorType type;
 
             private OctoQuadChannel(int channelId, SensorType type) {
-                this.channel = channelId;
+                this.channelId = channelId;
                 this.type = type;
             }
         }
@@ -51,6 +57,7 @@ public final class Constants {
         public static final double METERS_TO_FEET = 1.0 / FEET_TO_METERS;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
         public static final double RADIANS_TO_DEGREES = 180.0 / Math.PI;
+        public static final double LIFT_VOLTAGE_TO_CM = 1.0;
     }
 
     public static final class SensorRates {

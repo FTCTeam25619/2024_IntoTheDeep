@@ -6,10 +6,10 @@ import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.lib.OdometryData;
 import org.firstinspires.ftc.teamcode.lib.RevIMU;
 
@@ -45,6 +45,8 @@ public class Sensors extends SubsystemBase {
     @Override
     public void periodic() {
         OdometryData odomData = this.getOdometryData(true);
+        mTelemetry.addData("Sensors: L Lift Enc", getLiftLeftEncoderCount());
+        mTelemetry.addData("Sensors: R Lift Enc", getLiftRightEncoderCount());
         mTelemetry.addData("Sensors: L Odom Pos", odomData.leftOdometerPosition);
         mTelemetry.addData("Sensors: R Odom Pos", odomData.rightOdometerPosition);
         mTelemetry.addData("Sensors: P Odom Pos", odomData.perpendicularOdometerPosition);
@@ -58,24 +60,24 @@ public class Sensors extends SubsystemBase {
         // Reverse the count-direction of any encoder that is incorrect.
         // e.g. if you push the robot forward and the left encoder counts down, then reverse it so it counts up.
         this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channelId,
                 OctoQuad.EncoderDirection.REVERSE);
         this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channelId,
                 OctoQuad.EncoderDirection.FORWARD);
         this.octoQuad.setSingleEncoderDirection(
-                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channelId,
                 OctoQuad.EncoderDirection.FORWARD);
 
         // Set sample rates for velocity reads from OctoQuad channels
         this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryLeft.channelId,
                 Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
         this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryRight.channelId,
                 Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
         this.octoQuad.setSingleVelocitySampleInterval(
-                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channel,
+                Constants.OctoQuad.OctoQuadChannel.OdometryPerp.channelId,
                 Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
 
         // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
@@ -92,6 +94,18 @@ public class Sensors extends SubsystemBase {
         if (this.octoQuadReady) {
             this.octoQuad.readAllEncoderData(this.encoderDataBlock);
         }
+    }
+
+    private double getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel channel) {
+        return this.encoderDataBlock.positions[channel.channelId];
+    }
+
+    public double getLiftLeftEncoderCount() {
+        return this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder);
+    }
+
+    public double getLiftRightEncoderCount() {
+        return this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder);
     }
 
     /*
