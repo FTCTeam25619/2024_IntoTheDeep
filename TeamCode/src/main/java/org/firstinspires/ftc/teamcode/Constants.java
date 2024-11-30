@@ -24,6 +24,18 @@ public final class Constants {
         public static final String leftOdometryPod = liftLeftMotor;
         public static final String rightOdometryPod = liftRightMotor;
         public static final String perpOdometryPod = "odom_perp";
+        public static final String intakePivotLeftServo = "intake_pivot_left";
+        public static final String intakePivotRightServo = "intake_pivot_right";
+        public static final String intakeSlideLeftServo = "intake_slide_left";
+        public static final String intakeSlideRightServo = "intake_slide_right";
+        public static final String intakeContinuousLeftServo = "intake_cont_left";
+        public static final String intakeContinuousRightServo = "intake_cont_right";
+        public static final String intakeColorSensor = "intake_color";
+        public static final String depositorArmLeftServo = "depositor_arm_left";
+        public static final String depositorArmRightServo = "depositor_arm_right";
+        public static final String depositorWristServo = "depositor_wrist";
+        public static final String depositorGripServo = "depositor_grip";
+        public static final String depositorColorSensor = "depositor_color";
     }
 
     public static final class OctoQuad {
@@ -63,9 +75,10 @@ public final class Constants {
         public static final double LIFT_VOLTAGE_TO_CM = 1.0;
     }
 
-    public static final class SensorRates {
+    public static final class Sensors {
         public static final int ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS = 25;
         public static final double ODOMETRY_VELOCITY_SAMPLES_PER_SEC = 1000.0 / ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS;
+        public static final double COLOR_MATCH_DISTANCE_THRESHOLD = 0.8;
     }
 
     public static final class DriveControl {
@@ -102,6 +115,41 @@ public final class Constants {
                 new Translation2d(-0.207147, 0.165971);
         public static final Translation2d REAR_RIGHT_WHEEL_POS_M =
                 new Translation2d(-0.207147, -0.165971);
+    }
+
+    public static final class Intake {
+        public static final double PIVOT_MIN_ANGLE_LEFT_DEG = 0.0;
+        public static final double PIVOT_MAX_ANGLE_LEFT_DEG = 180.0;
+        public static final double PIVOT_MIN_ANGLE_RIGHT_DEG = 0.0;
+        public static final double PIVOT_MAX_ANGLE_RIGHT_DEG = 180.0;
+        public static final double SLIDE_MIN_ANGLE_LEFT_DEG = 0.0;
+        public static final double SLIDE_MAX_ANGLE_LEFT_DEG = 180.0;
+        public static final double SLIDE_MIN_ANGLE_RIGHT_DEG = 0.0;
+        public static final double SLIDE_MAX_ANGLE_RIGHT_DEG = 180.0;
+
+        public static enum SlideSetPosition {
+            TEST_POSITION(0.5, 0.5);
+
+            public final double leftPosition;
+            public final double rightPosition;
+
+            private SlideSetPosition(double leftPosition, double rightPosition) {
+                this.leftPosition = leftPosition;
+                this.rightPosition = rightPosition;
+            }
+        }
+
+        public static enum PivotSetPosition {
+            TEST_POSITION(0.5, 0.5);
+
+            public final double leftPosition;
+            public final double rightPosition;
+
+            private PivotSetPosition(double leftPosition, double rightPosition) {
+                this.leftPosition = leftPosition;
+                this.rightPosition = rightPosition;
+            }
+        }
     }
 
     public static final class OpModes{
