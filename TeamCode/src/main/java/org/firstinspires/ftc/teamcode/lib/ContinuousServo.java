@@ -10,8 +10,8 @@ public class ContinuousServo {
     private final CRServo servo;
 
     public static enum ContinuousServoDirection {
-        REVERSE(0.0),
-        STOP(0.5),
+        REVERSE(-1.0),
+        STOP(0.0),
         FORWARD(1.0);
 
         public final double power;
