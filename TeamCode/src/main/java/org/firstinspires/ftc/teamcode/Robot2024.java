@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.subsystems.Climb;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
+import org.firstinspires.ftc.teamcode.commands.MoveLiftToHeight;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -170,13 +171,17 @@ public class Robot2024 extends Robot {
         c2DPadDown.whenReleased(new InstantCommand(lift::stopMotors));
 
 
-//        c2B.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
-        c2B.whileHeld(new InstantCommand(() -> intake.intakePiece(), intake));
+//        c2B.whileHeld(new InstantCommand(() -> intake.intakePiece(), intake));
 
         // Neutral position
         c2X.whenPressed(new InstantCommand(this::neutralServos));
         // Re-home/reset to start positions
         c2Y.whenPressed(new InstantCommand(this::resetServos));
+
+        // TODO:  Temporary settings for testing Lift PID
+        c2A.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_DOWN_POS));
+//        c2B.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_LOW_BASKET));
+        c2B.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_HI_BASKET));
 
         // After piece intake, handoff to depositor
         c2LeftBumper.whenPressed(
