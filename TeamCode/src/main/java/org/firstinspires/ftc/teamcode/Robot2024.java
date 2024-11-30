@@ -13,10 +13,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
+import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 
@@ -28,7 +30,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Sensors;
    - Check that the REV Robotics Control Hub shows up above
    - in Android Studio with a green dot (connected)
  */
- 
+
 public class Robot2024 extends Robot {
     private final RobotState robotState;
     private final GamepadEx controller1;
@@ -36,6 +38,7 @@ public class Robot2024 extends Robot {
     private final Sensors sensors;
     private final Drivetrain drivetrain;
     private final Lift lift;
+    private final Intake intake;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -56,14 +59,15 @@ public class Robot2024 extends Robot {
                 RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT);
 
+        // Controllers
+        controller1 = new GamepadEx(gamepad1);
+        controller2 = new GamepadEx(gamepad2);
+
         // Subsystems
         sensors = new Sensors(hardwareMap, gyroOrientation, Robot2024.telemetry);
         drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
         lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
-
-        // Controllers
-        controller1 = new GamepadEx(gamepad1);
-        controller2 = new GamepadEx(gamepad2);
+        intake = new Intake(hardwareMap, Robot2024.telemetry);
     }
 
     public void initOpMode() {
@@ -71,6 +75,8 @@ public class Robot2024 extends Robot {
             case DRIVE_STICKS_TELEOP:
                 CommandScheduler.getInstance().schedule(
                         new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                CommandScheduler.getInstance().schedule(
+                        new IntakePiece(intake, controller2, Robot2024.telemetry));
         }
         setupGamepadButtonMappings();
     }
@@ -85,7 +91,6 @@ public class Robot2024 extends Robot {
 
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
-
         c2DPadUp.whileHeld(new MoveLiftUp(lift));
         c2DPadDown.whileHeld(new MoveLiftDown(lift));
     }
