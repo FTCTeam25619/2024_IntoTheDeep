@@ -102,10 +102,10 @@ public class Sensors extends SubsystemBase {
         // Set sample rates for velocity reads from OctoQuad channels
         this.octoQuad.setSingleVelocitySampleInterval(
                 Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder.channelId,
-                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+                Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
         this.octoQuad.setSingleVelocitySampleInterval(
                 Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder.channelId,
-                Constants.SensorRates.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+                Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
 
         // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
         this.octoQuad.saveParametersToFlash();
