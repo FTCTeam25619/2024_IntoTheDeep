@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import android.graphics.Color;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.hardware.SensorColor;
 import com.arcrobotics.ftclib.hardware.SensorRevTOFDistance;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -31,7 +28,6 @@ public class Intake extends SubsystemBase{
     private ContinuousServo intakeLeft;
     private ContinuousServo intakeRight;
 
-//    private SensorColor colorSensor;
     private SensorRevTOFDistance distanceSensor;
     private NormalizedColorSensor colorSensor;
 
@@ -49,29 +45,18 @@ public class Intake extends SubsystemBase{
                 Constants.Intake.PIVOT_MAX_ANGLE_LEFT_DEG,
                 AngleUnit.DEGREES);
         pivotRight = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
+                Constants.HardwareMapping.intakePivotRightServo,
                 Constants.Intake.PIVOT_MIN_ANGLE_RIGHT_DEG,
                 Constants.Intake.PIVOT_MAX_ANGLE_RIGHT_DEG,
                 AngleUnit.DEGREES);
 
         slideLeft = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
+                Constants.HardwareMapping.intakeSlideLeftServo,
                 Constants.Intake.SLIDE_MIN_ANGLE_LEFT_DEG,
                 Constants.Intake.SLIDE_MAX_ANGLE_LEFT_DEG,
                 AngleUnit.DEGREES);
         slideRight = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
-                Constants.Intake.SLIDE_MIN_ANGLE_RIGHT_DEG,
-                Constants.Intake.SLIDE_MAX_ANGLE_RIGHT_DEG,
-                AngleUnit.DEGREES);
-
-        slideLeft = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
-                Constants.Intake.SLIDE_MIN_ANGLE_LEFT_DEG,
-                Constants.Intake.SLIDE_MAX_ANGLE_LEFT_DEG,
-                AngleUnit.DEGREES);
-        slideRight = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
+                Constants.HardwareMapping.intakeSlideRightServo,
                 Constants.Intake.SLIDE_MIN_ANGLE_RIGHT_DEG,
                 Constants.Intake.SLIDE_MAX_ANGLE_RIGHT_DEG,
                 AngleUnit.DEGREES);
@@ -90,19 +75,19 @@ public class Intake extends SubsystemBase{
         NormalizedRGBA argb = getColor();
         float[] hsv = new float[3];
         Color.colorToHSV(argb.toColor(), hsv);
-        int[] argbArr = {(int)(argb.alpha * 255), (int)(argb.red * 255), (int)(argb.green * 255), (int)(argb.blue * 255)};
-//        mTelemetry.addData("Intake: L Pivot Pos", pivotLeft.getPosition());
-//        mTelemetry.addData("Intake: R Pivot Pos", pivotRight.getPosition());
-//        mTelemetry.addData("Intake: L Slide Pos", slideLeft.getPosition());
-//        mTelemetry.addData("Intake: R Slide Pos", slideRight.getPosition());
+        float hue = hsv[0];
+        mTelemetry.addData("Intake: L Pivot Pos", pivotLeft.getPosition());
+        mTelemetry.addData("Intake: R Pivot Pos", pivotRight.getPosition());
+        mTelemetry.addData("Intake: L Slide Pos", slideLeft.getPosition());
+        mTelemetry.addData("Intake: R Slide Pos", slideRight.getPosition());
         mTelemetry.addData("Intake: L Cont Power", intakeLeft.getPower());
         mTelemetry.addData("Intake: R Cont Power", intakeRight.getPower());
-        mTelemetry.addData("Intake: RED Match", GamePieceColor.RED.matches(hsv[0]));
-        mTelemetry.addData("Intake: BLUE Match", GamePieceColor.BLUE.matches(hsv[0])    );
-        mTelemetry.addData("Intake: YELLOW Match", GamePieceColor.YELLOW.matches(hsv[0]));
-        mTelemetry.addData("Intake: BLACK Match", GamePieceColor.BLACK.matches(hsv[0]));
+        mTelemetry.addData("Intake: Color h", "%.3f", hue);
+        mTelemetry.addData("Intake: RED Match", GamePieceColor.RED.matches(hue));
+        mTelemetry.addData("Intake: BLUE Match", GamePieceColor.BLUE.matches(hue));
+        mTelemetry.addData("Intake: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
+        mTelemetry.addData("Intake: BLACK Match", GamePieceColor.BLACK.matches(hue));
         mTelemetry.addData("Intake: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
-        mTelemetry.addData("Intake: Color h", "%.3f", hsv[0]);
     }
 
     public void intakePiece() {
