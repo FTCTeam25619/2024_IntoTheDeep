@@ -152,6 +152,49 @@ public final class Constants {
         }
     }
 
+    public static final class Depositor {
+        public static final double ARM_MIN_ANGLE_LEFT_DEG = 0.0;
+        public static final double ARM_MAX_ANGLE_LEFT_DEG = 180.0;
+        public static final double ARM_MIN_ANGLE_RIGHT_DEG = 0.0;
+        public static final double ARM_MAX_ANGLE_RIGHT_DEG = 180.0;
+        public static final double GRIP_MIN_ANGLE_DEG = 0.0;
+        public static final double GRIP_MAX_ANGLE_DEG = 180.0;
+        public static final double WRIST_MIN_ANGLE_DEG = 0.0;
+        public static final double WRIST_MAX_ANGLE_DEG = 180.0;
+
+        public static enum ArmSetPosition {
+            TEST_POSITION(0.5, 0.5);
+
+            public final double leftPosition;
+            public final double rightPosition;
+
+            private ArmSetPosition(double leftPosition, double rightPosition) {
+                this.leftPosition = leftPosition;
+                this.rightPosition = rightPosition;
+            }
+        }
+
+        public static enum WristSetPosition {
+            TEST_POSITION(0.5);
+
+            public final double position;
+
+            private WristSetPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static enum GripSetPosition {
+            TEST_POSITION(0.5);
+
+            public final double position;
+
+            private GripSetPosition(double position) {
+                this.position = position;
+            }
+        }
+    }
+
     public static final class OpModes{
         public enum OpModeType{
             TELEOP,

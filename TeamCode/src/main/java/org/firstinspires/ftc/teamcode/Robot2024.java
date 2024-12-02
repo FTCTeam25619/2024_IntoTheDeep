@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
+import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -39,6 +40,7 @@ public class Robot2024 extends Robot {
     private final Drivetrain drivetrain;
     private final Lift lift;
     private final Intake intake;
+    private final Depositor depositor;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -68,6 +70,7 @@ public class Robot2024 extends Robot {
         drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
         lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
         intake = new Intake(hardwareMap, Robot2024.telemetry);
+        depositor = new Depositor(hardwareMap, Robot2024.telemetry);
     }
 
     public void initOpMode() {
