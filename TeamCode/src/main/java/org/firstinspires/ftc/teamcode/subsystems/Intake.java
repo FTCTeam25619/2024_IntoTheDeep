@@ -9,21 +9,23 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.lib.ContinuousServo;
 import org.firstinspires.ftc.teamcode.lib.GamePieceColor;
 
 public class Intake extends SubsystemBase{
     // Discrete Servos
-    private ServoEx pivotLeft;
-    private ServoEx pivotRight;
-    private ServoEx slideLeft;
-    private ServoEx slideRight;
+    private Servo pivotLeft;
+    private Servo pivotRight;
+    private Servo slideLeft;
+    private Servo slideRight;
     // Continuous Servos
     private ContinuousServo intakeLeft;
     private ContinuousServo intakeRight;
@@ -39,27 +41,11 @@ public class Intake extends SubsystemBase{
         intakeLeft.setInverted(false);
         intakeRight.setInverted(true);
 
-        pivotLeft = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotLeftServo,
-                Constants.Intake.PIVOT_MIN_ANGLE_LEFT_DEG,
-                Constants.Intake.PIVOT_MAX_ANGLE_LEFT_DEG,
-                AngleUnit.DEGREES);
-        pivotRight = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakePivotRightServo,
-                Constants.Intake.PIVOT_MIN_ANGLE_RIGHT_DEG,
-                Constants.Intake.PIVOT_MAX_ANGLE_RIGHT_DEG,
-                AngleUnit.DEGREES);
+        pivotLeft = hardwareMap.get(Servo.class, Constants.HardwareMapping.intakePivotLeftServo);
+        pivotRight = hardwareMap.get(Servo.class, Constants.HardwareMapping.intakePivotRightServo);
 
-        slideLeft = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakeSlideLeftServo,
-                Constants.Intake.SLIDE_MIN_ANGLE_LEFT_DEG,
-                Constants.Intake.SLIDE_MAX_ANGLE_LEFT_DEG,
-                AngleUnit.DEGREES);
-        slideRight = new SimpleServo(hardwareMap,
-                Constants.HardwareMapping.intakeSlideRightServo,
-                Constants.Intake.SLIDE_MIN_ANGLE_RIGHT_DEG,
-                Constants.Intake.SLIDE_MAX_ANGLE_RIGHT_DEG,
-                AngleUnit.DEGREES);
+        slideLeft = hardwareMap.get(Servo.class, Constants.HardwareMapping.intakeSlideLeftServo);
+        slideRight = hardwareMap.get(Servo.class, Constants.HardwareMapping.intakeSlideRightServo);
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, Constants.HardwareMapping.intakeColorSensor);
         distanceSensor = new SensorRevTOFDistance(hardwareMap, Constants.HardwareMapping.intakeColorSensor);
@@ -113,6 +99,23 @@ public class Intake extends SubsystemBase{
     public void slideToPosition(Constants.Intake.SlideSetPosition position) {
         slideLeft.setPosition(position.leftPosition);
         slideRight.setPosition(position.rightPosition);
+    }
+
+
+    public void pivotLeftToTestPosition() {
+        pivotLeft.setPosition(ConfigConstants.TestPositions.pivotLeftTest);
+    }
+
+    public void pivotRightToTestPosition() {
+        pivotRight.setPosition(ConfigConstants.TestPositions.pivotRightTest);
+    }
+
+    public void slideLeftToTestPosition() {
+        slideLeft.setPosition(ConfigConstants.TestPositions.slideLeftTest);
+    }
+
+    public void slideRightToTestPosition() {
+        slideRight.setPosition(ConfigConstants.TestPositions.slideRightTest);
     }
 
     private NormalizedRGBA getColor() {

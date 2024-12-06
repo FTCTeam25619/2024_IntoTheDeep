@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.Robot;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -94,7 +96,42 @@ public class Robot2024 extends Robot {
 
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
-        c2DPadUp.whileHeld(new MoveLiftUp(lift));
-        c2DPadDown.whileHeld(new MoveLiftDown(lift));
+//        c2DPadUp.whileHeld(new MoveLiftUp(lift));
+//        c2DPadDown.whileHeld(new MoveLiftDown(lift));
+
+        GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
+        c2A.whenPressed(new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.TEST_POSITION)));
+
+        GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
+        c2B.whenPressed(new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.TEST_POSITION)));
+
+        GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
+//        c2X.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+        c2X.whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
+                        new WaitCommand(850),
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN))
+                )
+        );
+
+
+        GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
+//        c2Y.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
+        c2Y.whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
+                        new WaitCommand(10),
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN))
+                )
+        );
+
+        GamepadButton c2DPadLeft = new GamepadButton(controller2, GamepadKeys.Button.DPAD_LEFT);
+//        c2DPadLeft.whileHeld(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
+        c2DPadLeft.whileHeld(new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)));
+
+        GamepadButton c2DPadRight = new GamepadButton(controller2, GamepadKeys.Button.DPAD_RIGHT);
+//        c2DPadRight.whileHeld(new InstantCommand(() -> intake.pivotRightToTestPosition()));
+        c2DPadRight.whileHeld(new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)));
     }
 }
