@@ -131,6 +131,10 @@ public final class Constants {
             }
         }
 
+
+        public static final double inManualIncrement = 0.002;
+        public static final double outManualIncrement = -0.002;
+
         public static enum PivotSetPosition {
             UP(0.985, 0.01),
             DOWN(0.0, 1.0);

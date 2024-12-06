@@ -4,21 +4,20 @@ import android.graphics.Color;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.SensorRevTOFDistance;
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.lib.ContinuousServo;
 import org.firstinspires.ftc.teamcode.lib.GamePieceColor;
+
+import java.util.function.DoubleSupplier;
 
 public class Intake extends SubsystemBase{
     // Discrete Servos
@@ -34,6 +33,12 @@ public class Intake extends SubsystemBase{
     private NormalizedColorSensor colorSensor;
 
     private Telemetry mTelemetry;
+
+    final double leftSlideRange = Constants.Intake.SlideSetPosition.IN.leftPosition -
+            Constants.Intake.SlideSetPosition.OUT.leftPosition;
+    final double rightSlideRange = Constants.Intake.SlideSetPosition.IN.rightPosition -
+            Constants.Intake.SlideSetPosition.OUT.rightPosition;
+    final double rightToLeftSlideRatio = rightSlideRange / leftSlideRange;
 
     public Intake(HardwareMap hardwareMap, Telemetry telemetry){
         intakeLeft = new ContinuousServo(hardwareMap, Constants.HardwareMapping.intakeContinuousLeftServo);
@@ -101,6 +106,48 @@ public class Intake extends SubsystemBase{
         slideRight.setPosition(position.rightPosition);
     }
 
+    /**
+     * Set the intake slide to a particular position.  Input is left servo target position.
+     *
+     * Assumes that the OUT leftPosition is < IN leftPosition.
+     *
+     * @param leftSlidePosition
+     */
+    public void moveSlidetoPosition(double leftSlidePosition) {
+        double leftTarget = MathUtils.clamp(leftSlidePosition,
+                Constants.Intake.SlideSetPosition.OUT.leftPosition,
+                Constants.Intake.SlideSetPosition.IN.leftPosition);
+        double rightTarget = matchingRightSlidePoint(leftTarget);
+        slideLeft.setPosition(leftTarget);
+        slideRight.setPosition(rightTarget);
+    }
+
+    public void moveSlideManual(DoubleSupplier speedSupplier, double increment) {
+        double speed = speedSupplier.getAsDouble();
+        // Deadband
+        if (speed < 0.1) {
+            return;
+        }
+        double smoothedSpeed = speed * speed * speed * increment;
+        double newPosition = slideLeft.getPosition() + smoothedSpeed;
+        newPosition = MathUtils.clamp(newPosition,
+                Constants.Intake.SlideSetPosition.OUT.leftPosition,
+                Constants.Intake.SlideSetPosition.IN.leftPosition);
+        moveSlidetoPosition(newPosition);
+    }
+
+    /**
+     *
+     * Uses the IN and OUT enum constants and assumes linearity in converting slide Left servo
+     * setpoint to the matching right servo setpoint
+     *
+     * @param leftSlidePoint The Left slide servo position
+     * @return returns the matching value to use for right slide servo
+     */
+    private double matchingRightSlidePoint (double leftSlidePoint) {
+        return (leftSlidePoint - Constants.Intake.SlideSetPosition.OUT.leftPosition) *
+                rightToLeftSlideRatio + Constants.Intake.SlideSetPosition.OUT.rightPosition;
+    }
 
     public void pivotLeftToTestPosition() {
         pivotLeft.setPosition(ConfigConstants.TestPositions.pivotLeftTest);

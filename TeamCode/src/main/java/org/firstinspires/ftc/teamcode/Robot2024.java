@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -16,8 +17,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
-import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
-import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
@@ -25,6 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 
+import java.util.function.DoubleSupplier;
 
 /* To connect to the Control Hub device via Wi-Fi:
    - Connect Wi-Fi to the FTC-25619 network
@@ -47,6 +47,25 @@ public class Robot2024 extends Robot {
     public static Telemetry telemetry;
 
     private final OpModeSelection selectedOpMode;
+
+    private class TriggerDetector extends Trigger implements DoubleSupplier {
+        GamepadEx mGamepad;
+        GamepadKeys.Trigger mTrigger;
+        public TriggerDetector(GamepadEx gamepad, GamepadKeys.Trigger trigger)  {
+            mGamepad = gamepad;
+            mTrigger = trigger;
+        }
+        public boolean getPressed() {
+            return (mGamepad.getTrigger(mTrigger) > 0.1);
+        }
+        public double getAsDouble() {
+            return mGamepad.getTrigger(mTrigger);
+        }
+    }
+
+    TriggerDetector c1LeftTriggerDetector;
+    TriggerDetector c1RightTriggerDetector;
+
 
     public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, OpModeSelection opModeSelection) {
         // OpMode selection
@@ -93,6 +112,17 @@ public class Robot2024 extends Robot {
 
         GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
         c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
+
+        c1RightTriggerDetector = new TriggerDetector(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER);
+        c1LeftTriggerDetector = new TriggerDetector(controller1, GamepadKeys.Trigger.LEFT_TRIGGER);
+        Trigger c1RightTrigger = new Trigger(c1RightTriggerDetector::getPressed);
+        Trigger c1LeftTrigger = new Trigger(c1LeftTriggerDetector::getPressed);
+        c1RightTrigger.whenActive(new InstantCommand(() ->
+                intake.moveSlideManual(c1RightTriggerDetector,
+                        Constants.Intake.outManualIncrement)));
+        c1LeftTrigger.whenActive(new InstantCommand(() ->
+                intake.moveSlideManual(c1LeftTriggerDetector,
+                        Constants.Intake.inManualIncrement)));
 
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
