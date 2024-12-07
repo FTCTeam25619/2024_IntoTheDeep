@@ -30,6 +30,7 @@ public class MoveLiftUp extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return mLift.getPositionCM() >= mLift.maxPositionCM;
+//        return mLift.getPositionCM() >= mLift.maxPositionCM;
+        return false;
     }
 }

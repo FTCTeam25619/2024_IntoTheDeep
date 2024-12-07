@@ -147,6 +147,9 @@ public final class Constants {
 
     public static final class Depositor {
         public static enum ArmSetPosition {
+            HOME(0.0, 0.985),
+            NEUTRAL(0.02, 0.945),
+            SCORING(0.8, 0.175),
             TEST_POSITION(
                     ConfigConstants.TestPositions.armLeftTest,
                     ConfigConstants.TestPositions.armRightTest

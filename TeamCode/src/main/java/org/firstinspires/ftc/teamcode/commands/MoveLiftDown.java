@@ -30,6 +30,7 @@ public class MoveLiftDown extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return mLift.getPositionCM() <= mLift.minPositionCM;
+//        return mLift.getPositionCM() <= mLift.minPositionCM;
+        return false;
     }
 }

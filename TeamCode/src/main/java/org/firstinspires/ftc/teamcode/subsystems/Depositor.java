@@ -59,8 +59,8 @@ public class Depositor extends SubsystemBase {
     }
 
     public void armToPosition(Constants.Depositor.ArmSetPosition position) {
-//        armLeft.setPosition(position.leftPosition);
-//        armRight.setPosition(position.rightPosition);
+        armLeft.setPosition(position.leftPosition);
+        armRight.setPosition(position.rightPosition);
     }
 
     public void armLeftToTestPosition() {
