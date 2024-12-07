@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -14,10 +13,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
-import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
-import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
@@ -78,10 +76,8 @@ public class Robot2024 extends Robot {
     public void initOpMode() {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
-                CommandScheduler.getInstance().schedule(
-                        new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
-                CommandScheduler.getInstance().schedule(
-                        new IntakePiece(intake, controller2, Robot2024.telemetry));
+                drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                intake.setDefaultCommand(new IntakePiece(intake, controller2, Robot2024.telemetry));
         }
         setupGamepadButtonMappings();
     }
@@ -94,16 +90,23 @@ public class Robot2024 extends Robot {
         GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
         c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
 
+        GamepadButton c1A = new GamepadButton(controller1, GamepadKeys.Button.A);
+        c1A.whileHeld(new InstantCommand(() -> depositor.awaitPiece()));
+
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
-        c2DPadUp.whileHeld(new MoveLiftUp(lift));
-        c2DPadDown.whileHeld(new MoveLiftDown(lift));
+//        c2DPadUp.whileHeld(new MoveLiftUp(lift));
+//        c2DPadDown.whileHeld(new MoveLiftDown(lift));
+        c2DPadUp.whileHeld(new InstantCommand(() -> lift.setMotorPower(ConfigConstants.ManualMovement.liftUpMotorPower)));
+        c2DPadUp.whenReleased(new InstantCommand(lift::stopMotors));
+        c2DPadDown.whileHeld(new InstantCommand(() -> lift.setMotorPower(ConfigConstants.ManualMovement.liftDownMotorPower)));
+        c2DPadDown.whenReleased(new InstantCommand(lift::stopMotors));
 
         GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
-        c2A.whenPressed(new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.TEST_POSITION)));
+        c2A.whenPressed(new InstantCommand(() -> depositor.gripToTestPosition()));
 
         GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
-        c2B.whenPressed(new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.TEST_POSITION)));
+        c2B.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
 
         GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
 //        c2X.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
@@ -111,7 +114,9 @@ public class Robot2024 extends Robot {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
                         new WaitCommand(850),
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN))
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
+                        new WaitCommand(50),
+                        new AwaitGamePiece(depositor)
                 )
         );
 
@@ -127,15 +132,18 @@ public class Robot2024 extends Robot {
         );
 
         GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
-//        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armLeftToTestPosition()));
-        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
+        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+//        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
 
         GamepadButton c2RightBumper = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_BUMPER);
-//        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armRightToTestPosition()));
-        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING)));
+        c2RightBumper.whileHeld(new InstantCommand(() -> intake.slideRightToTestPosition()));
+//        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING)));
 
         GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
 //        c2Back.whileHeld(new InstantCommand(() -> depositor.armRightToTestPosition()));
         c2Back.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)));
+
+        GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
     }
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
+import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 
 public class MoveLiftUp extends CommandBase {
@@ -21,6 +22,7 @@ public class MoveLiftUp extends CommandBase {
     @Override
     public void execute() {
         mLift.setMotorPower(motorPower);
+//        mLift.setMotorPower(ConfigConstants.ManualMovement.liftUpMotorPower);
     }
 
     @Override
@@ -30,7 +32,6 @@ public class MoveLiftUp extends CommandBase {
 
     @Override
     public boolean isFinished() {
-//        return mLift.getPositionCM() >= mLift.maxPositionCM;
-        return false;
+        return mLift.getPositionCM() >= mLift.maxPositionCM;
     }
 }
