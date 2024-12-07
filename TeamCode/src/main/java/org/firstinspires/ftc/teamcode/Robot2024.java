@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.Robot;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -16,6 +18,7 @@ import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftDown;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftUp;
+import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -39,6 +42,7 @@ public class Robot2024 extends Robot {
     private final Drivetrain drivetrain;
     private final Lift lift;
     private final Intake intake;
+    private final Depositor depositor;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -57,7 +61,7 @@ public class Robot2024 extends Robot {
         // Gyro Orientation on Robot
         gyroOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT);
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT);
 
         // Controllers
         controller1 = new GamepadEx(gamepad1);
@@ -68,6 +72,7 @@ public class Robot2024 extends Robot {
         drivetrain = new Drivetrain(hardwareMap, sensors, robotState, Robot2024.telemetry);
         lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
         intake = new Intake(hardwareMap, Robot2024.telemetry);
+        depositor = new Depositor(hardwareMap, Robot2024.telemetry);
     }
 
     public void initOpMode() {
@@ -93,5 +98,44 @@ public class Robot2024 extends Robot {
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
         c2DPadUp.whileHeld(new MoveLiftUp(lift));
         c2DPadDown.whileHeld(new MoveLiftDown(lift));
+
+        GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
+        c2A.whenPressed(new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.TEST_POSITION)));
+
+        GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
+        c2B.whenPressed(new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.TEST_POSITION)));
+
+        GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
+//        c2X.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+        c2X.whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
+                        new WaitCommand(850),
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN))
+                )
+        );
+
+
+        GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
+//        c2Y.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
+        c2Y.whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
+                        new WaitCommand(10),
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN))
+                )
+        );
+
+        GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
+//        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armLeftToTestPosition()));
+        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
+
+        GamepadButton c2RightBumper = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_BUMPER);
+//        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armRightToTestPosition()));
+        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING)));
+
+        GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
+//        c2Back.whileHeld(new InstantCommand(() -> depositor.armRightToTestPosition()));
+        c2Back.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)));
     }
 }

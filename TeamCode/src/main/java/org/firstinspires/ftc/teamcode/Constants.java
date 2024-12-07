@@ -118,17 +118,9 @@ public final class Constants {
     }
 
     public static final class Intake {
-        public static final double PIVOT_MIN_ANGLE_LEFT_DEG = 0.0;
-        public static final double PIVOT_MAX_ANGLE_LEFT_DEG = 180.0;
-        public static final double PIVOT_MIN_ANGLE_RIGHT_DEG = 0.0;
-        public static final double PIVOT_MAX_ANGLE_RIGHT_DEG = 180.0;
-        public static final double SLIDE_MIN_ANGLE_LEFT_DEG = 0.0;
-        public static final double SLIDE_MAX_ANGLE_LEFT_DEG = 180.0;
-        public static final double SLIDE_MIN_ANGLE_RIGHT_DEG = 0.0;
-        public static final double SLIDE_MAX_ANGLE_RIGHT_DEG = 180.0;
-
         public static enum SlideSetPosition {
-            TEST_POSITION(0.5, 0.5);
+            IN(0.23, 0.015),
+            OUT(0.035, 0.205);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -140,7 +132,8 @@ public final class Constants {
         }
 
         public static enum PivotSetPosition {
-            TEST_POSITION(0.5, 0.5);
+            UP(0.985, 0.01),
+            DOWN(0.0, 1.0);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -148,6 +141,49 @@ public final class Constants {
             private PivotSetPosition(double leftPosition, double rightPosition) {
                 this.leftPosition = leftPosition;
                 this.rightPosition = rightPosition;
+            }
+        }
+    }
+
+    public static final class Depositor {
+        public static enum ArmSetPosition {
+            HOME(0.0, 0.985),
+            NEUTRAL(0.02, 0.945),
+            SCORING(0.8, 0.175),
+            TEST_POSITION(
+                    ConfigConstants.TestPositions.armLeftTest,
+                    ConfigConstants.TestPositions.armRightTest
+            );
+
+            public final double leftPosition;
+            public final double rightPosition;
+
+            private ArmSetPosition(double leftPosition, double rightPosition) {
+                this.leftPosition = leftPosition;
+                this.rightPosition = rightPosition;
+            }
+        }
+
+        public static enum WristSetPosition {
+            INTAKE(0.215),
+            TEST_POSITION(ConfigConstants.TestPositions.wristTest);
+
+            public final double position;
+
+            private WristSetPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static enum GripSetPosition {
+            OPEN(0.2),
+            CLOSED(0.65),
+            TEST_POSITION(ConfigConstants.TestPositions.gripTest);
+
+            public final double position;
+
+            private GripSetPosition(double position) {
+                this.position = position;
             }
         }
     }

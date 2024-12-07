@@ -15,7 +15,7 @@ public class RobotState {
         this.mTelemetry = robotTelemetry;
 
         this.slowDriveMode = false;
-        this.robotDriveMode = DriveMode.FIELD_CENTRIC_CUSTOM;
+        this.robotDriveMode = DriveMode.ROBOT_CENTRIC_CUSTOM;
 
         mTelemetry.addData("RobotState: SLOW MODE", this.slowDriveMode);
         mTelemetry.addData("RobotState: FIELD CENTRIC", this.robotDriveMode.fieldCentric);

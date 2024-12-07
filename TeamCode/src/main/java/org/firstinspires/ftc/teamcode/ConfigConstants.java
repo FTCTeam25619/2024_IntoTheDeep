@@ -15,5 +15,17 @@ public class ConfigConstants {
         public static float BLACK_HUE_MIN = 0;
         public static float BLACK_HUE_MAX = 10;
     }
+
+    @Config
+    public static class TestPositions {
+        public static volatile double slideLeftTest = 0.5;
+        public static volatile double slideRightTest = 0.5;
+        public static volatile double pivotLeftTest = 0.5;
+        public static volatile double pivotRightTest = 0.5;
+        public static volatile double wristTest = 0.215;
+        public static volatile double gripTest = 0.65;
+        public static volatile double armLeftTest = 0.5;
+        public static volatile double armRightTest = 0.5;
+    }
 }
 
