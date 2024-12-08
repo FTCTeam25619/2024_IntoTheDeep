@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.geometry.Translation2d;
 public final class Constants {
 
     public static final class DebugModes {
-        public static final boolean ENABLE_FTC_DASHBOARD = true;
+        public static final boolean ENABLE_FTC_DASHBOARD = false;
     }
 
     public static final class RobotModes {
@@ -120,7 +120,9 @@ public final class Constants {
     public static final class Intake {
         public static enum SlideSetPosition {
             IN(0.23, 0.015),
-            OUT(0.035, 0.205);
+            NEUTRAL(0.22, 0.025),
+//            OUT(0.035, 0.205);
+            OUT(0.155, 0.065);
 
             public final double leftPosition;
             public final double rightPosition;
