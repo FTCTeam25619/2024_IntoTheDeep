@@ -18,7 +18,7 @@ public class ConfigConstants {
 
     @Config
     public static class ManualMovement {
-        public static volatile double liftDownMotorPower = -0.5;
+        public static volatile double liftDownMotorPower = -0.15;
         public static volatile double liftUpMotorPower = 0.5;
     }
 
