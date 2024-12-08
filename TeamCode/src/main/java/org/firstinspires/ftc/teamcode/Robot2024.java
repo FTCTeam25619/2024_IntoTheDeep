@@ -82,68 +82,120 @@ public class Robot2024 extends Robot {
         setupGamepadButtonMappings();
     }
 
+    public void resetServos() {
+        intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
+        intake.slideToPosition(Constants.Intake.SlideSetPosition.IN);
+        depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+        depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE);
+        depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME);
+    }
+
+    public void neutralServos() {
+        intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
+        intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL);
+        depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+        depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE);
+        depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
+    }
+
     public void setupGamepadButtonMappings() {
+        // Setup controller 1 buttons
+        GamepadButton c1DPadUp = new GamepadButton(controller1, GamepadKeys.Button.DPAD_UP);
+        GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
+        GamepadButton c1A = new GamepadButton(controller1, GamepadKeys.Button.A);
+        GamepadButton c1B = new GamepadButton(controller1, GamepadKeys.Button.B);
+        GamepadButton c1X = new GamepadButton(controller1, GamepadKeys.Button.X);
+        GamepadButton c1Y = new GamepadButton(controller1, GamepadKeys.Button.Y);
         GamepadButton c1LeftBumper = new GamepadButton(controller1, GamepadKeys.Button.LEFT_BUMPER);
+        GamepadButton c1RightBumper = new GamepadButton(controller1, GamepadKeys.Button.RIGHT_BUMPER);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
+        // Setup controller 2 buttons
+        GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
+        GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
+        GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
+        GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
+        GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
+        GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
+        GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
+        GamepadButton c2RightBumper = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_BUMPER);
+        GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
+        GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+
+        // Map controller 1 buttons
+        c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
+
+        // Neutral mode (retract slide/intake, arm to neutral)
+        c1X.whenPressed(this::neutralServos);
+        // Reset to start position
+        c1Y.whenPressed(this::resetServos);
+
         c1LeftBumper.whenPressed(new InstantCommand(() -> robotState.setSlowDriveMode(true)));
         c1LeftBumper.whenReleased(new InstantCommand(() -> robotState.setSlowDriveMode(false)));
 
-        GamepadButton c1DPadDown = new GamepadButton(controller1, GamepadKeys.Button.DPAD_DOWN);
-        c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
+        // Extend intake
+        c1RightBumper.whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
+                        new WaitCommand(10),
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+                )
+        );
 
-        GamepadButton c1A = new GamepadButton(controller1, GamepadKeys.Button.A);
+
         c1A.whileHeld(new InstantCommand(() -> depositor.awaitPiece()));
 
-        GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
-        GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
-//        c2DPadUp.whileHeld(new MoveLiftUp(lift));
-//        c2DPadDown.whileHeld(new MoveLiftDown(lift));
+        // Map controller 2 buttons
         c2DPadUp.whileHeld(new InstantCommand(() -> lift.setMotorPower(ConfigConstants.ManualMovement.liftUpMotorPower)));
         c2DPadUp.whenReleased(new InstantCommand(lift::stopMotors));
         c2DPadDown.whileHeld(new InstantCommand(() -> lift.setMotorPower(ConfigConstants.ManualMovement.liftDownMotorPower)));
         c2DPadDown.whenReleased(new InstantCommand(lift::stopMotors));
 
-        GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
-        c2A.whenPressed(new InstantCommand(() -> depositor.gripToTestPosition()));
 
-        GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
-        c2B.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
+//        c2B.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
+        c2B.whileHeld(new InstantCommand(() -> intake.intakePiece(), intake));
 
-        GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
-//        c2X.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
-        c2X.whenPressed(
+        // Neutral position
+        c2X.whenPressed(new InstantCommand(this::neutralServos));
+        // Re-home/reset to start positions
+        c2Y.whenPressed(new InstantCommand(this::resetServos));
+
+        // After piece intake, handoff to depositor
+        c2LeftBumper.whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
                         new WaitCommand(850),
                         new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
                         new WaitCommand(50),
-                        new AwaitGamePiece(depositor)
+                        new AwaitGamePiece(depositor),
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL)),
+                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL))
                 )
         );
 
+        // Press & hold to move to scoring position, release to score
+        c2RightBumper.whenPressed(new InstantCommand(() -> {
+                depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+        }));
+        c2RightBumper.whenReleased(new SequentialCommandGroup(
+                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                new WaitCommand(500),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL))
+        ));
 
-        GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
-//        c2Y.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
-        c2Y.whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
-                        new WaitCommand(10),
-                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN))
-                )
-        );
-
-        GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
-        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+//        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
 
-        GamepadButton c2RightBumper = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_BUMPER);
-        c2RightBumper.whileHeld(new InstantCommand(() -> intake.slideRightToTestPosition()));
+//        c2RightBumper.whileHeld(new InstantCommand(() -> intake.slideRightToTestPosition()));
 //        c2RightBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING)));
 
-        GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
 //        c2Back.whileHeld(new InstantCommand(() -> depositor.armRightToTestPosition()));
-        c2Back.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)));
-
-        GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
-        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
+//        c2Back.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)));
+//
+//        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
     }
 }
