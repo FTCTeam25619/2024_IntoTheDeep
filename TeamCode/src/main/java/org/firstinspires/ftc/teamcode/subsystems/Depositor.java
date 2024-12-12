@@ -31,21 +31,27 @@ public class Depositor extends SubsystemBase {
         grip = hardwareMap.get(Servo.class, Constants.HardwareMapping.depositorGripServo);
         wrist = hardwareMap.get(Servo.class, Constants.HardwareMapping.depositorWristServo);
 
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, Constants.HardwareMapping.intakeColorSensor);
-        distanceSensor = new SensorRevTOFDistance(hardwareMap, Constants.HardwareMapping.intakeColorSensor);
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, Constants.HardwareMapping.depositorColorSensor);
+        distanceSensor = new SensorRevTOFDistance(hardwareMap, Constants.HardwareMapping.depositorColorSensor);
         if (colorSensor instanceof SwitchableLight) {
             ((SwitchableLight)colorSensor).enableLight(true);
         }
 
         mTelemetry = telemetry;
+
+        initializePositions();
+    }
+
+    private void initializePositions() {
+        gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+        wristToPosition(Constants.Depositor.WristSetPosition.INTAKE);
+        armToPosition(Constants.Depositor.ArmSetPosition.HOME);
     }
 
     @Override
     public void periodic() {
-        NormalizedRGBA argb = getColor();
-        float[] hsv = new float[3];
-        Color.colorToHSV(argb.toColor(), hsv);
-        float hue = hsv[0];
+        float hue = getHue();
+        boolean piece = seeingPiece();
         mTelemetry.addData("Depositor: L Arm Pos", armLeft.getPosition());
         mTelemetry.addData("Depositor: R Arm Pos", armRight.getPosition());
         mTelemetry.addData("Depositor: Wrist Pos", wrist.getPosition());
@@ -56,6 +62,7 @@ public class Depositor extends SubsystemBase {
         mTelemetry.addData("Depositor: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
         mTelemetry.addData("Depositor: BLACK Match", GamePieceColor.BLACK.matches(hue));
         mTelemetry.addData("Depositor: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
+        mTelemetry.addData("Depositor: Piece?", piece);
     }
 
     public void armToPosition(Constants.Depositor.ArmSetPosition position) {
@@ -71,17 +78,45 @@ public class Depositor extends SubsystemBase {
         armRight.setPosition(ConfigConstants.TestPositions.armRightTest);
     }
 
-    public void wristToPosition(Constants.Depositor.WristSetPosition position) {
-//        wrist.setPosition(position.positionDegrees);
+    public void gripToTestPosition() {
+        grip.setPosition(ConfigConstants.TestPositions.gripTest);
+    }
+
+    public void wristToTestPosition() {
         wrist.setPosition(ConfigConstants.TestPositions.wristTest);
     }
 
+    public void awaitPiece() {
+        if (seeingPiece()) {
+            gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+        } else {
+            gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+        }
+    }
+
+    public void wristToPosition(Constants.Depositor.WristSetPosition position) {
+        wrist.setPosition(position.position);
+    }
+
     public void gripToPosition(Constants.Depositor.GripSetPosition position) {
-//        grip.setPosition(position.position);
-        grip.setPosition(ConfigConstants.TestPositions.gripTest);
+        grip.setPosition(position.position);
     }
 
     private NormalizedRGBA getColor() {
         return colorSensor.getNormalizedColors();
+    }
+
+    private float getHue() {
+        NormalizedRGBA argb = colorSensor.getNormalizedColors();
+        float[] hsv = new float[3];
+        Color.colorToHSV(argb.toColor(), hsv);
+        return hsv[0];
+    }
+
+    public boolean seeingPiece() {
+        float hue = getHue();
+        return GamePieceColor.BLUE.matches(hue) ||
+                GamePieceColor.RED.matches(hue) ||
+                GamePieceColor.YELLOW.matches(hue);
     }
 }

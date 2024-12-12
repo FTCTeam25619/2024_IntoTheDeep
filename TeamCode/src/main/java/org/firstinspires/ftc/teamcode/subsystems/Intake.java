@@ -121,4 +121,18 @@ public class Intake extends SubsystemBase{
     private NormalizedRGBA getColor() {
         return colorSensor.getNormalizedColors();
     }
+
+    private float getHue() {
+        NormalizedRGBA argb = colorSensor.getNormalizedColors();
+        float[] hsv = new float[3];
+        Color.colorToHSV(argb.toColor(), hsv);
+        return hsv[0];
+    }
+
+    public boolean seeingPiece() {
+        float hue = getHue();
+        return GamePieceColor.BLUE.matches(hue) ||
+                GamePieceColor.RED.matches(hue) ||
+                GamePieceColor.YELLOW.matches(hue);
+    }
 }
