@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.ConfigConstants;
+
 import kotlin.coroutines.ContinuationInterceptor;
 
 public class ContinuousServo {
@@ -34,11 +36,11 @@ public class ContinuousServo {
     }
 
     public void forward() {
-        servo.setPower(ContinuousServoDirection.FORWARD.power);
+        servo.setPower(ContinuousServoDirection.FORWARD.power * ConfigConstants.IntakeTiming.spinSpeedFactor);
     }
 
     public void reverse() {
-        servo.setPower(ContinuousServoDirection.REVERSE.power);
+        servo.setPower(ContinuousServoDirection.REVERSE.power * ConfigConstants.IntakeTiming.spinSpeedFactor);
     }
 
     public void setInverted(boolean isInverted) {
