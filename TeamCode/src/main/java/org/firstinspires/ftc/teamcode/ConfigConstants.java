@@ -26,6 +26,7 @@ public class ConfigConstants {
     public static class IntakeTiming {
         public static volatile int cycleWaitAfterPiece = 10;
         public static volatile int cyclesReverse = 1;
+        public static volatile double spinSpeedFactor = 0.27;
     }
 
     @Config
