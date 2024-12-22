@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -15,16 +17,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.actions.TestAutoAction;
 import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.HoldClimb;
-import org.firstinspires.ftc.teamcode.commands.IntakePiece;
-import org.firstinspires.ftc.teamcode.commands.ManualControlClimb;
-import org.firstinspires.ftc.teamcode.commands.ManualControlLift;
 import org.firstinspires.ftc.teamcode.lib.triggers.LeftStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.RightStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.TriggerButton;
 import org.firstinspires.ftc.teamcode.subsystems.Climb;
+import org.firstinspires.ftc.teamcode.commands.TestAuto;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftToHeight;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -33,6 +34,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.subsystems.Sweep;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 /* To connect to the Control Hub device via Wi-Fi:
@@ -90,11 +94,23 @@ public class Robot2024 extends Robot {
 
     public void initOpMode() {
         switch (selectedOpMode) {
+            case TEST_AUTO:
+                Set<Subsystem> requirements = new HashSet<Subsystem>();
+                // FIXME: We likely want to split up what we're doing in auto into several commands
+                //        that separately control subsystems or groups of them unless there's specific
+                //        coordination to be done here. Requirements management will need testing.
+                requirements.add(drivetrain);
+                requirements.add(intake);
+                requirements.add(lift);
+                requirements.add(depositor);
+                TestAutoAction action = new TestAutoAction();
+                CommandScheduler.getInstance().schedule(new TestAuto(action, requirements));
+                break;
             case DRIVE_STICKS_TELEOP:
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                setupGamepadButtonMappings();
         }
-        setupGamepadButtonMappings();
     }
 
     public void resetServos() {
