@@ -20,6 +20,8 @@ public class ConfigConstants {
     public static class ManualMovement {
         public static volatile double liftDownMotorPower = -0.15;
         public static volatile double liftUpMotorPower = 0.5;
+        public static volatile double climbUpMotorPower = 1.0;
+        public static volatile double climbDownMotorPower = -1.0;
     }
 
     @Config

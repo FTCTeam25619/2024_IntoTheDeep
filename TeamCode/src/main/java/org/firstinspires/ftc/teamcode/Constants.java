@@ -18,12 +18,14 @@ public final class Constants {
         public static final String backLeftWheel = "back_left_wheel";
         public static final String backRightWheel = "back_right_wheel";
         public static final String octoQuad = "octoquad";
+        public static final String climbLeftMotor = "climb_left";
+        public static final String climbRightMotor = "climb_right";
         public static final String liftLeftMotor = "lift_left";
         public static final String liftRightMotor = "lift_right";
         public static final String liftAbsoluteEncoder = "lift_abs_enc";
         public static final String leftOdometryPod = liftLeftMotor;
         public static final String rightOdometryPod = liftRightMotor;
-        public static final String perpOdometryPod = "odom_perp";
+        public static final String perpOdometryPod = climbLeftMotor;
         public static final String intakePivotLeftServo = "intake_pivot_left";
         public static final String intakePivotRightServo = "intake_pivot_right";
         public static final String intakeSlideLeftServo = "intake_slide_left";
@@ -50,6 +52,8 @@ public final class Constants {
         public enum OctoQuadChannel {
             LiftLeftEncoder(0, SensorType.MotorEncoder),
             LiftRightEncoder(1, SensorType.MotorEncoder),
+            ClimbLeftEncoder(6, SensorType.MotorEncoder),
+            ClimbRightEncoder(7, SensorType.MotorEncoder),
             // Odometry pod facing forward direction on left side of robot (Axial motion)
             OdometryLeft(2, SensorType.OdometryPod),
             // Odometry pod facing forward direction on right side of robot (Axial motion)
