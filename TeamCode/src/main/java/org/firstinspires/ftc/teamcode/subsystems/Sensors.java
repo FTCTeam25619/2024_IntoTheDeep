@@ -47,6 +47,8 @@ public class Sensors extends SubsystemBase {
     private OctoQuad.EncoderDataBlock encoderDataBlock;
     public double liftLeftEncoderPosition;
     public double liftRightEncoderPosition;
+    public double climbLeftEncoderPosition;
+    public double climbRightEncoderPosition;
 
     private boolean octoQuadReady = false;
 
@@ -82,6 +84,8 @@ public class Sensors extends SubsystemBase {
         readOdometrySensors();
         mTelemetry.addData("Sensors: L Lift Enc", liftLeftEncoderPosition);
         mTelemetry.addData("Sensors: R Lift Enc", liftRightEncoderPosition);
+        mTelemetry.addData("Sensors: L Climb Enc", climbLeftEncoderPosition);
+        mTelemetry.addData("Sensors: R Climb Enc", climbRightEncoderPosition);
         mTelemetry.addData("Sensors: L Odom Pos m", odomLeftDistanceMeters);
         mTelemetry.addData("Sensors: R Odom Pos m", odomRightDistanceMeters);
         mTelemetry.addData("Sensors: P Odom Pos m", odomPerpDistanceMeters);
@@ -98,6 +102,12 @@ public class Sensors extends SubsystemBase {
         this.octoQuad.setSingleEncoderDirection(
                 Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder.channelId,
                 OctoQuad.EncoderDirection.FORWARD);
+        this.octoQuad.setSingleEncoderDirection(
+                Constants.OctoQuad.OctoQuadChannel.ClimbLeftEncoder.channelId,
+                OctoQuad.EncoderDirection.FORWARD);
+        this.octoQuad.setSingleEncoderDirection(
+                Constants.OctoQuad.OctoQuadChannel.ClimbRightEncoder.channelId,
+                OctoQuad.EncoderDirection.FORWARD);
 
         // Set sample rates for velocity reads from OctoQuad channels
         this.octoQuad.setSingleVelocitySampleInterval(
@@ -105,6 +115,12 @@ public class Sensors extends SubsystemBase {
                 Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
         this.octoQuad.setSingleVelocitySampleInterval(
                 Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder.channelId,
+                Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+        this.octoQuad.setSingleVelocitySampleInterval(
+                Constants.OctoQuad.OctoQuadChannel.ClimbLeftEncoder.channelId,
+                Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
+        this.octoQuad.setSingleVelocitySampleInterval(
+                Constants.OctoQuad.OctoQuadChannel.ClimbRightEncoder.channelId,
                 Constants.Sensors.ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS);
 
         // Any changes that are made should be saved in FLASH just in case there is a sensor power glitch.
@@ -122,6 +138,8 @@ public class Sensors extends SubsystemBase {
             this.octoQuad.readAllEncoderData(this.encoderDataBlock);
             this.liftLeftEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftLeftEncoder);
             this.liftRightEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.LiftRightEncoder);
+            this.climbLeftEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.ClimbLeftEncoder);
+            this.climbRightEncoderPosition = this.getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel.ClimbRightEncoder);
         }
     }
 

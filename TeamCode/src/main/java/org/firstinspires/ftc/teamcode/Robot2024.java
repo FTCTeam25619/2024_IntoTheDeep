@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
+import org.firstinspires.ftc.teamcode.subsystems.Climb;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
@@ -41,6 +42,7 @@ public class Robot2024 extends Robot {
     private final Lift lift;
     private final Intake intake;
     private final Depositor depositor;
+    private final Climb climb;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -71,6 +73,7 @@ public class Robot2024 extends Robot {
         lift = new Lift(hardwareMap, sensors, Robot2024.telemetry);
         intake = new Intake(hardwareMap, Robot2024.telemetry);
         depositor = new Depositor(hardwareMap, Robot2024.telemetry);
+        climb = new Climb(hardwareMap, sensors, Robot2024.telemetry);
     }
 
     public void initOpMode() {
@@ -197,5 +200,11 @@ public class Robot2024 extends Robot {
 //        c2Back.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)));
 //
 //        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
+
+        c2Back.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower)));
+        c2Back.whenReleased(new InstantCommand(() -> climb.stopMotors()));
+
+        c2Start.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower)));
+        c2Start.whenReleased(new InstantCommand(() -> climb.stopMotors()));
     }
 }
