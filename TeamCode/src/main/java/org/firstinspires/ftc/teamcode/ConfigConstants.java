@@ -39,6 +39,30 @@ public class ConfigConstants {
     }
 
     @Config
+    public static class Lift {
+        // TODO:  The following are placeholder values!  Update them.
+        public static volatile double MIN_POS_CM = 0.0;
+        public static volatile double MAX_POS_CM = 70.0;
+
+        public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
+        public static volatile double LIFT_LOW_BASKET = 20.0;  // TODO:  Placeholder value
+        public static volatile double LIFT_HI_BASKET = 50.0;   // TODO:  Placeholder value
+
+        public static volatile double MAX_UP_POWER = 0.4;
+        public static volatile double MAX_DOWN_POWER = -0.15;
+
+        @Config
+        public static class PID {
+            // TOOO :: PID values need to be tuned
+            public static volatile double kP = 0.1;  // Max power at 2cm error
+            public static volatile double kI = 0.0;
+            public static volatile double kD = 0.0;
+            public static volatile double kF = 0.23;   // % motor power to counteract gravity
+        }
+
+    }
+
+    @Config
     public static class HandoffTiming {
         public static volatile int waitBeforeEject = 50;
         public static volatile int waitAfterPiece = 10;

@@ -179,9 +179,9 @@ public class Robot2024 extends Robot {
         c2Y.whenPressed(new InstantCommand(this::resetServos));
 
         // TODO:  Temporary settings for testing Lift PID
-        c2A.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_DOWN_POS));
-//        c2B.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_LOW_BASKET));
-        c2B.whenPressed(new MoveLiftToHeight(lift, Constants.Lift.LIFT_HI_BASKET));
+        c2A.whenPressed(new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_DOWN_POS));
+//        c2B.whenPressed(new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_LOW_BASKET));
+        c2B.whenPressed(new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_HI_BASKET));
 
         // After piece intake, handoff to depositor
         c2LeftBumper.whenPressed(

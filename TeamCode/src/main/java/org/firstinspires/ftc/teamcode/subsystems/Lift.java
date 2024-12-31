@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 
 public class Lift extends SubsystemBase{
@@ -17,8 +18,8 @@ public class Lift extends SubsystemBase{
     private Sensors mSensors;
     private Telemetry mTelemetry;
 
-    public double minPositionCM = Constants.Lift.MIN_POS_CM;
-    public double maxPositionCM = Constants.Lift.MAX_POS_CM;
+    public double minPositionCM = ConfigConstants.Lift.MIN_POS_CM;
+    public double maxPositionCM = ConfigConstants.Lift.MAX_POS_CM;
 
     private boolean pidEnabled = false;
     private double pidTarget = minPositionCM;
@@ -43,19 +44,22 @@ public class Lift extends SubsystemBase{
         mSensors = sensors;
         mTelemetry = telemetry;
 
-        liftPID = new PIDController(Constants.Lift.PID.kP, Constants.Lift.PID.kI, Constants.Lift.PID.kD);
+        liftPID = new PIDController(
+                ConfigConstants.Lift.PID.kP,
+                ConfigConstants.Lift.PID.kI,
+                ConfigConstants.Lift.PID.kD);
         liftPID.setTolerance(Constants.Lift.LIFT_TOLERANCE);
-        liftPID.setSetPoint(Constants.Lift.MIN_POS_CM + Constants.Lift.LIFT_TOLERANCE); // Slightly above hard stop
+        liftPID.setSetPoint(ConfigConstants.Lift.MIN_POS_CM + Constants.Lift.LIFT_TOLERANCE); // Slightly above hard stop
     }
 
     @Override
     public void periodic() {
         if (pidEnabled) {
             // Power is adjusted by a constant feed forward to account for gravity
-            double power = liftPID.calculate(getPositionCM(), pidTarget) + Constants.Lift.PID.kF;
+            double power = liftPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.PID.kF;
             // Clamp max PID speed
-            power = Math.min(power, Constants.Lift.MAX_UP_POWER);
-            power = Math.max(power, Constants.Lift.MAX_DOWN_POWER);
+            power = Math.min(power, ConfigConstants.Lift.MAX_UP_POWER);
+            power = Math.max(power, ConfigConstants.Lift.MAX_DOWN_POWER);
             leftMotor.set(power);
             rightMotor.set(power);
         } else {
@@ -64,6 +68,7 @@ public class Lift extends SubsystemBase{
         }
 
         mTelemetry.addData("Lift: Pos cm", getPositionCM());
+        mTelemetry.addData("Lift: Abs Enc V", absoluteEncoder.getVoltage());
         mTelemetry.addData("Lift: L Enc", mSensors.liftLeftEncoderPosition);
         mTelemetry.addData("Lift: R Enc", mSensors.liftRightEncoderPosition);
         mTelemetry.addData("Lift: PID Enabled", pidEnabled);
@@ -72,7 +77,7 @@ public class Lift extends SubsystemBase{
     }
 
     public double getPositionCM(){
-        return absoluteEncoder.getVoltage() * Constants.Lift.LIFT_V_TO_CM;
+        return (absoluteEncoder.getVoltage() - Constants.Lift.MIN_V) * Constants.Lift.LIFT_V_TO_CM;
     }
 
     public void setMotorPower(double power ){
@@ -96,8 +101,8 @@ public class Lift extends SubsystemBase{
      *
      */
     public void setPidTarget (double target) {
-        double safeHeight = Math.min(target, Constants.Lift.MAX_POS_CM);
-        safeHeight = Math.max(safeHeight, Constants.Lift.MIN_POS_CM);
+        double safeHeight = Math.min(target, ConfigConstants.Lift.MAX_POS_CM);
+        safeHeight = Math.max(safeHeight, ConfigConstants.Lift.MIN_POS_CM);
         this.pidTarget = safeHeight;
         liftPID.setSetPoint(safeHeight);
     }

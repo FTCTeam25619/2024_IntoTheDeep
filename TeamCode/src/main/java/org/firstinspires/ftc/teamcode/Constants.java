@@ -85,65 +85,14 @@ public final class Constants {
     }
 
     public static final class Lift {
-        public static final double MAX_V = 3.3;
-        public static final double MIN_V = 0.0;
+        public static final double MAX_V = 3.045;
+        public static final double MIN_V = 1.671;
+        public static final double V_RANGE = MAX_V - MIN_V;
         public static final double POT_ROTATIONS = 10.0;
-        public static final double SPOOL_CIRC_CM     = 7.5819;
-
-        public static final double SENSOR_MAX_CM = POT_ROTATIONS * SPOOL_CIRC_CM;
-        public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / (MAX_V - MIN_V);
+        public static final double SPOOL_CIRC_CM = 7.5819;
+        public static final double SENSOR_MAX_CM = 71.755;
+        public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / V_RANGE;
         public static final double LIFT_TOLERANCE = 1.0;  // +/- CM
-
-        // TODO:  The following are placeholder values!  Update them.
-        public static final double MIN_POS_CM = 5.0;
-        public static final double MAX_POS_CM = 70.0;
-
-        public static final double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
-        public static final double LIFT_LOW_BASKET = 20.0;  // TODO:  Placeholder value
-        public static final double LIFT_HI_BASKET = 50.0;   // TODO:  Placeholder value
-
-        public static final double MAX_UP_POWER = 0.5;
-        public static final double MAX_DOWN_POWER = -0.3;
-
-        public final class PID {
-            // TOOO :: PID values need to be tuned
-            public static final double kP = 0.5;  // Max power at 2cm error
-            public static final double kI = 0.0;
-            public static final double kD = 0.0;
-            public static final double kF = 0.05;   // % motor power to counteract gravity
-        }
-
-    }
-
-    public static final class Lift {
-        public static final double MAX_V = 3.3;
-        public static final double MIN_V = 0.0;
-        public static final double POT_ROTATIONS = 10.0;
-        public static final double SPOOL_CIRC_CM     = 7.5819;
-
-        public static final double SENSOR_MAX_CM = POT_ROTATIONS * SPOOL_CIRC_CM;
-        public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / (MAX_V - MIN_V);
-        public static final double LIFT_TOLERANCE = 1.0;  // +/- CM
-
-        // TODO:  The following are placeholder values!  Update them.
-        public static final double MIN_POS_CM = 5.0;
-        public static final double MAX_POS_CM = 70.0;
-
-        public static final double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
-        public static final double LIFT_LOW_BASKET = 20.0;  // TODO:  Placeholder value
-        public static final double LIFT_HI_BASKET = 50.0;   // TODO:  Placeholder value
-
-        public static final double MAX_UP_POWER = 0.5;
-        public static final double MAX_DOWN_POWER = -0.3;
-
-        public final class PID {
-            // TOOO :: PID values need to be tuned
-            public static final double kP = 0.5;  // Max power at 2cm error
-            public static final double kI = 0.0;
-            public static final double kD = 0.0;
-            public static final double kF = 0.05;   // % motor power to counteract gravity
-        }
-
     }
 
     public static final class DriveControl {
