@@ -128,6 +128,8 @@ public class Robot2024 extends Robot {
         // Map controller 1 buttons
         c1DPadDown.whenPressed(new InstantCommand(() -> robotState.toggleFieldCentric()));
 
+        c1A.whileHeld(new InstantCommand(() -> depositor.awaitPiece()));
+
         // Neutral mode (retract slide/intake, arm to neutral)
         c1X.whenPressed(this::neutralServos);
         // Reset to start position
@@ -148,8 +150,18 @@ public class Robot2024 extends Robot {
                 )
         );
 
-
-        c1A.whileHeld(new InstantCommand(() -> depositor.awaitPiece()));
+        // Pivot position tuning
+//        c1Back.whenPressed(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
+//        c1Start.whenPressed(new InstantCommand(() -> intake.pivotRightToTestPosition()));
+        // Slide position tuning
+//        c1Back.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+//        c1Start.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
+        // Arm position tuning
+//        c1Back.whenPressed(new InstantCommand(() -> depositor.armLeftToTestPosition()));
+//        c1Start.whenPressed(new InstantCommand(() -> depositor.armRightToTestPosition()));
+        // Grip & Wrist position tuning
+//        c1Back.whenPressed(new InstantCommand(() -> depositor.gripToTestPosition()));
+//        c1Start.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
 
         // Map controller 2 buttons
         c2DPadUp.whileHeld(new InstantCommand(() -> lift.setMotorPower(ConfigConstants.ManualMovement.liftUpMotorPower)));
@@ -180,14 +192,22 @@ public class Robot2024 extends Robot {
         );
 
         // Press & hold to move to scoring position, release to score
-        c2RightBumper.whenPressed(new InstantCommand(() -> {
-                depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
-                depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
-        }));
+        c2RightBumper.whenPressed(new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                }),
+                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
+                new InstantCommand(() -> {
+                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
+                })
+        ));
         c2RightBumper.whenReleased(new SequentialCommandGroup(
                 new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                new WaitCommand(500),
-                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL))
+                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForArmMS),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
+                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForWristMS),
+                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
         ));
 
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
