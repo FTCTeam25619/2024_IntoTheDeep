@@ -123,10 +123,9 @@ public final class Constants {
 
     public static final class Intake {
         public static enum SlideSetPosition {
-            IN(0.23, 0.015),
-            NEUTRAL(0.22, 0.025),
-//            OUT(0.035, 0.205);
-            OUT(0.155, 0.065);
+            IN(0.245, 0.015),
+            NEUTRAL(0.175, 0.085),
+            OUT(0.0, 0.26);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -155,11 +154,7 @@ public final class Constants {
         public static enum ArmSetPosition {
             HOME(0.0, 0.985),
             NEUTRAL(0.02, 0.945),
-            SCORING(0.8, 0.175),
-            TEST_POSITION(
-                    ConfigConstants.TestPositions.armLeftTest,
-                    ConfigConstants.TestPositions.armRightTest
-            );
+            SCORING(0.8, 0.175);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -172,7 +167,7 @@ public final class Constants {
 
         public static enum WristSetPosition {
             INTAKE(0.215),
-            TEST_POSITION(ConfigConstants.TestPositions.wristTest);
+            SCORING(0.715);
 
             public final double position;
 
@@ -183,8 +178,7 @@ public final class Constants {
 
         public static enum GripSetPosition {
             OPEN(0.2),
-            CLOSED(0.65),
-            TEST_POSITION(ConfigConstants.TestPositions.gripTest);
+            CLOSED(0.65);
 
             public final double position;
 

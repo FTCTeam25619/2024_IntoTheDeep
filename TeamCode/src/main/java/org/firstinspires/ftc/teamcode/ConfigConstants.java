@@ -27,8 +27,15 @@ public class ConfigConstants {
     @Config
     public static class IntakeTiming {
         public static volatile int cycleWaitAfterPiece = 10;
-        public static volatile int cyclesReverse = 1;
-        public static volatile double spinSpeedFactor = 0.27;
+        public static volatile int cyclesReverse = -1;
+        public static volatile double spinSpeedFactor = 1.0;
+    }
+
+    @Config
+    public static class ScoringTiming {
+        public static volatile int postScoreWaitForArmMS = 500;
+        public static volatile int postScoreWaitForWristMS = 250;
+        public static volatile int preScoreWaitForWristMS = 550;
     }
 
     @Config
@@ -39,14 +46,14 @@ public class ConfigConstants {
 
     @Config
     public static class TestPositions {
-        public static volatile double slideLeftTest = 0.5;
-        public static volatile double slideRightTest = 0.5;
-        public static volatile double pivotLeftTest = 0.5;
-        public static volatile double pivotRightTest = 0.5;
+        public static volatile double slideLeftTest = 0.23;
+        public static volatile double slideRightTest = 0.015;
+        public static volatile double pivotLeftTest = 0.985;
+        public static volatile double pivotRightTest = 0.01;
         public static volatile double wristTest = 0.215;
         public static volatile double gripTest = 0.2;
-        public static volatile double armLeftTest = 0.5;
-        public static volatile double armRightTest = 0.5;
+        public static volatile double armLeftTest = 0.8;
+        public static volatile double armRightTest = 0.175;
     }
 }
 
