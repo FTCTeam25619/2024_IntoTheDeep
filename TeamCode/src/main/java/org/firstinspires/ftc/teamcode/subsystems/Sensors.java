@@ -45,10 +45,10 @@ public class Sensors extends SubsystemBase {
     public double gyroHeadingDegrees;
     public long odomTimestampNanos;
     private OctoQuad.EncoderDataBlock encoderDataBlock;
-    public double liftLeftEncoderPosition;
-    public double liftRightEncoderPosition;
-    public double climbLeftEncoderPosition;
-    public double climbRightEncoderPosition;
+    public int liftLeftEncoderPosition;
+    public int liftRightEncoderPosition;
+    public int climbLeftEncoderPosition;
+    public int climbRightEncoderPosition;
 
     private boolean octoQuadReady = false;
 
@@ -151,7 +151,7 @@ public class Sensors extends SubsystemBase {
         this.gyroHeadingDegrees = this.gyro.getHeading(AngleUnit.DEGREES);
     }
 
-    private double getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel channel) {
+    private int getOctoQuadValue(Constants.OctoQuad.OctoQuadChannel channel) {
         return this.encoderDataBlock.positions[channel.channelId];
     }
 

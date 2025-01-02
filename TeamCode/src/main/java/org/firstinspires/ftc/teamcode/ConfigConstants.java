@@ -5,6 +5,19 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ConfigConstants {
     @Config
+    public static class Climb {
+        public static volatile double kPLeft = 0.5;
+        public static volatile double kILeft = 0.0;
+        public static volatile double kDLeft = 0.0;
+        public static volatile double kFLeft = 0.5;
+        public static volatile double kPRight = 0.5;
+        public static volatile double kIRight = 0.0;
+        public static volatile double kDRight = 0.0;
+        public static volatile double kFRight = 0.5;
+        public static volatile int holdTimeoutMS = 20000;
+    }
+
+    @Config
     public static class Colors {
         public static float BLUE_HUE_MIN = 210;
         public static float BLUE_HUE_MAX = 250;

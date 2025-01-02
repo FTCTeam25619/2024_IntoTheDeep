@@ -252,10 +252,24 @@ public class Robot2024 extends Robot {
 //
 //        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
 
-        c2Back.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower)));
-        c2Back.whenReleased(new InstantCommand(() -> climb.stopMotors()));
+        c2Back.whileHeld(new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
+        }));
+        c2Back.whenReleased(new SequentialCommandGroup(
+                new InstantCommand(() -> climb.enablePIDHold(true)),
+                new WaitCommand(ConfigConstants.Climb.holdTimeoutMS),
+                new InstantCommand(() -> climb.stopMotors())
+        ));
 
-        c2Start.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower)));
-        c2Start.whenReleased(new InstantCommand(() -> climb.stopMotors()));
+        c2Start.whileHeld(new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
+        }));
+        c2Start.whenReleased(new SequentialCommandGroup(
+                new InstantCommand(() -> climb.enablePIDHold(true)),
+                new WaitCommand(ConfigConstants.Climb.holdTimeoutMS),
+                new InstantCommand(() -> climb.stopMotors())
+        ));
     }
 }
