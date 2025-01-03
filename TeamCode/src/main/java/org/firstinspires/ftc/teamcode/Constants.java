@@ -85,14 +85,13 @@ public final class Constants {
     }
 
     public static final class Lift {
-        public static final double MAX_V = 3.045;
-        public static final double MIN_V = 1.671;
+        public static final double MAX_V = 3.070;
+        public static final double MIN_V = 1.680;
         public static final double V_RANGE = MAX_V - MIN_V;
         public static final double POT_ROTATIONS = 10.0;
         public static final double SPOOL_CIRC_CM = 7.5819;
         public static final double SENSOR_MAX_CM = 71.755;
         public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / V_RANGE;
-        public static final double LIFT_TOLERANCE = 1.0;  // +/- CM
     }
 
     public static final class DriveControl {

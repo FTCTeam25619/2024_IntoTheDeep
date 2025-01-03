@@ -25,7 +25,8 @@ public class Lift extends SubsystemBase{
     private double pidTarget = minPositionCM;
     private double manualPower = 0.0;
 
-    private PIDController liftPID;
+    private PIDController liftUpPID;
+    private PIDController liftDownPID;
 
     public Lift(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftLeftMotor);
@@ -44,22 +45,45 @@ public class Lift extends SubsystemBase{
         mSensors = sensors;
         mTelemetry = telemetry;
 
-        liftPID = new PIDController(
-                ConfigConstants.Lift.PID.kP,
-                ConfigConstants.Lift.PID.kI,
-                ConfigConstants.Lift.PID.kD);
-        liftPID.setTolerance(Constants.Lift.LIFT_TOLERANCE);
-        liftPID.setSetPoint(ConfigConstants.Lift.MIN_POS_CM + Constants.Lift.LIFT_TOLERANCE); // Slightly above hard stop
+        liftUpPID = new PIDController(
+                ConfigConstants.Lift.LiftPID.kPUp,
+                ConfigConstants.Lift.LiftPID.kIUp,
+                ConfigConstants.Lift.LiftPID.kDUp);
+        liftUpPID.setTolerance(ConfigConstants.Lift.LIFT_TOLERANCE_UP);
+        liftUpPID.setSetPoint(ConfigConstants.Lift.MIN_POS_CM + ConfigConstants.Lift.LIFT_TOLERANCE_UP); // Slightly above hard stop
+        liftDownPID = new PIDController(
+                ConfigConstants.Lift.LiftPID.kPDown,
+                ConfigConstants.Lift.LiftPID.kIDown,
+                ConfigConstants.Lift.LiftPID.kDDown);
+        liftDownPID.setTolerance(ConfigConstants.Lift.LIFT_TOLERANCE_DOWN);
+        liftDownPID.setSetPoint(ConfigConstants.Lift.MIN_POS_CM + ConfigConstants.Lift.LIFT_TOLERANCE_DOWN); // Slightly above hard stop
     }
 
     @Override
     public void periodic() {
         if (pidEnabled) {
-            // Power is adjusted by a constant feed forward to account for gravity
-            double power = liftPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.PID.kF;
+            double power;
+            if (getPositionCM() <= getPidTarget()) {
+                // Going up: Power is adjusted by a constant feed forward to account for gravity
+                power = liftUpPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFUp;
+            } else {
+                // Going down: Power is adjusted by a constant feed forward to account for gravity
+                power = liftDownPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFDown;
+            }
             // Clamp max PID speed
-            power = Math.min(power, ConfigConstants.Lift.MAX_UP_POWER);
-            power = Math.max(power, ConfigConstants.Lift.MAX_DOWN_POWER);
+            if (getPositionCM() < ConfigConstants.Lift.MIN_POS_CM + ConfigConstants.Lift.HOME_SLOW_ZONE_THRESHOLD) {
+                power = Math.min(power, ConfigConstants.Lift.MAX_UP_POWER);
+                power = Math.max(power, ConfigConstants.Lift.MAX_DOWN_POWER_CLOSE);
+            } else if (
+                    (getPositionCM() < pidTarget + ConfigConstants.Lift.TARGET_SLOW_ZONE_THRESHOLD) &&
+                    (getPositionCM() > pidTarget - ConfigConstants.Lift.TARGET_SLOW_ZONE_THRESHOLD)
+            ) {
+                power = Math.min(power, ConfigConstants.Lift.MAX_UP_POWER_CLOSE);
+                power = Math.max(power, ConfigConstants.Lift.MAX_DOWN_POWER_CLOSE);
+            } else {
+                power = Math.min(power, ConfigConstants.Lift.MAX_UP_POWER);
+                power = Math.max(power, ConfigConstants.Lift.MAX_DOWN_POWER);
+            }
             leftMotor.set(power);
             rightMotor.set(power);
         } else {
@@ -104,7 +128,8 @@ public class Lift extends SubsystemBase{
         double safeHeight = Math.min(target, ConfigConstants.Lift.MAX_POS_CM);
         safeHeight = Math.max(safeHeight, ConfigConstants.Lift.MIN_POS_CM);
         this.pidTarget = safeHeight;
-        liftPID.setSetPoint(safeHeight);
+        liftUpPID.setSetPoint(safeHeight);
+        liftDownPID.setSetPoint(safeHeight);
     }
 
     /**

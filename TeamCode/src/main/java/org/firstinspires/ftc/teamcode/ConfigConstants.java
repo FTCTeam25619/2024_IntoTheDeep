@@ -45,19 +45,29 @@ public class ConfigConstants {
         public static volatile double MAX_POS_CM = 70.0;
 
         public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
-        public static volatile double LIFT_LOW_BASKET = 20.0;  // TODO:  Placeholder value
-        public static volatile double LIFT_HI_BASKET = 50.0;   // TODO:  Placeholder value
+        public static volatile double LIFT_LOW_BASKET = 21.0;
+        public static volatile double LIFT_HI_BASKET = 62.0;
 
-        public static volatile double MAX_UP_POWER = 0.4;
-        public static volatile double MAX_DOWN_POWER = -0.15;
+        public static volatile double MAX_UP_POWER = 1.0;
+        public static volatile double MAX_UP_POWER_CLOSE = 0.4;
+        public static volatile double MAX_DOWN_POWER = -0.6;
+        public static volatile double MAX_DOWN_POWER_CLOSE = -0.25;
+        public static volatile double TARGET_SLOW_ZONE_THRESHOLD = 5.0;
+        public static volatile double HOME_SLOW_ZONE_THRESHOLD = 3.0;
+        public static volatile double LIFT_TOLERANCE_UP = 0.5;  // +/- CM
+        public static volatile double LIFT_TOLERANCE_DOWN = 0.2;  // +/- CM
 
         @Config
-        public static class PID {
+        public static class LiftPID {
             // TOOO :: PID values need to be tuned
-            public static volatile double kP = 0.1;  // Max power at 2cm error
-            public static volatile double kI = 0.0;
-            public static volatile double kD = 0.0;
-            public static volatile double kF = 0.23;   // % motor power to counteract gravity
+            public static volatile double kPUp = 0.175;  // Max power at 2cm error
+            public static volatile double kIUp = 0.0;
+            public static volatile double kDUp = 0.0;
+            public static volatile double kFUp = 0.25;   // % motor power to counteract gravity
+            public static volatile double kPDown = 0.35;  // Max power at 2cm error
+            public static volatile double kIDown = 0.0;
+            public static volatile double kDDown = 0.0;
+            public static volatile double kFDown = 0.0;   // % motor power to counteract gravity
         }
 
     }
