@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -199,21 +200,46 @@ public class Robot2024 extends Robot {
         // Press & hold to move to scoring position, release to score
         c2RightBumper.whenPressed(new SequentialCommandGroup(
                 new InstantCommand(() -> {
-                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
-                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                    intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL);
+                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
                 }),
-                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
-                new InstantCommand(() -> {
-                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
-                })
+                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForLiftMS),
+                new ParallelCommandGroup(
+                        new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_HI_BASKET),
+                        new SequentialCommandGroup(
+                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
+                                new InstantCommand(() -> {
+                                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                                }),
+                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
+                                new InstantCommand(() -> {
+                                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
+                                })
+                        )
+                )
         ));
-        c2RightBumper.whenReleased(new SequentialCommandGroup(
-                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForArmMS),
-                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
-                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForWristMS),
-                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
-        ));
+        c2RightBumper.whenReleased(
+                new ParallelCommandGroup(
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForArmMS),
+                                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
+                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForWristMS),
+                                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE)),
+                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForHomeMS),
+                                new InstantCommand(() -> {
+                                    intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
+                                    intake.slideToPosition(Constants.Intake.SlideSetPosition.IN);
+                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME);
+                                })
+                        ),
+                        new SequentialCommandGroup(
+                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForLiftMS),
+                                new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_DOWN_POS)
+                        )
+                )
+        );
 
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));

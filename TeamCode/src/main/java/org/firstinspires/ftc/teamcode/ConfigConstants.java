@@ -33,9 +33,13 @@ public class ConfigConstants {
 
     @Config
     public static class ScoringTiming {
+        public static volatile int preScoreWaitForLiftMS = 250;
+        public static volatile int preScoreWaitForArmMS = 0;
+        public static volatile int preScoreWaitForWristMS = 550;
         public static volatile int postScoreWaitForArmMS = 500;
         public static volatile int postScoreWaitForWristMS = 250;
-        public static volatile int preScoreWaitForWristMS = 550;
+        public static volatile int postScoreWaitForLiftMS = 500;
+        public static volatile int postScoreWaitForHomeMS = 1000;
     }
 
     @Config
@@ -59,10 +63,9 @@ public class ConfigConstants {
 
         @Config
         public static class LiftPID {
-            // TOOO :: PID values need to be tuned
-            public static volatile double kPUp = 0.175;  // Max power at 2cm error
+            public static volatile double kPUp = 0.07;  // Max power at 2cm error
             public static volatile double kIUp = 0.0;
-            public static volatile double kDUp = 0.0;
+            public static volatile double kDUp = 0.0125;
             public static volatile double kFUp = 0.25;   // % motor power to counteract gravity
             public static volatile double kPDown = 0.35;  // Max power at 2cm error
             public static volatile double kIDown = 0.0;
