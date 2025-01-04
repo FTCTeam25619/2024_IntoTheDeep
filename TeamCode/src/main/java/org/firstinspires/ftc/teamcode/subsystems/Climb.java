@@ -43,11 +43,14 @@ public class Climb extends SubsystemBase {
                 ConfigConstants.Climb.kILeft,
                 ConfigConstants.Climb.kDLeft
         );
+        leftPIDController.setTolerance(ConfigConstants.Climb.pidTolerance);
+
         rightPIDController = new PIDController(
                 ConfigConstants.Climb.kPRight,
                 ConfigConstants.Climb.kIRight,
                 ConfigConstants.Climb.kDRight
         );
+        rightPIDController.setTolerance(ConfigConstants.Climb.pidTolerance);
 
         mSensors = sensors;
         mTelemetry = telemetry;
@@ -57,16 +60,21 @@ public class Climb extends SubsystemBase {
     public void periodic() {
         mTelemetry.addData("Climb: L Enc", mSensors.climbLeftEncoderPosition);
         mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
+        mTelemetry.addData("Climb: PID L Target", leftPIDTarget);
+        mTelemetry.addData("Climb: PID R Target", rightPIDTarget);
+        mTelemetry.addData("Climb: PID Hold", enabledPID);
 
         if (enabledPID) {
-            double leftPower = leftPIDController.calculate() + ConfigConstants.Climb.kFLeft;
-            double rightPower = rightPIDController.calculate() + ConfigConstants.Climb.kFRight;
-            // TODO: Do we need to limit these for safety beyond -1 to 1? If so, how?
-            if (leftPower > 1.0) { leftPower = 1.0; }
-            if (leftPower < -1.0) { leftPower = -1.0; }
-            if (rightPower > 1.0) { rightPower = 1.0; }
-            if (rightPower < -1.0) { rightPower = -1.0; }
+            // PID hold: recalculate power via PID controllers
+            leftPower = leftPIDController.calculate() + ConfigConstants.Climb.kFLeft;
+            rightPower = rightPIDController.calculate() + ConfigConstants.Climb.kFRight;
         }
+
+        // TODO: Do we need to limit these for safety beyond -1 to 1? If so, how?
+        if (leftPower > 1.0) { leftPower = 1.0; }
+        if (leftPower < -1.0) { leftPower = -1.0; }
+        if (rightPower > 1.0) { rightPower = 1.0; }
+        if (rightPower < -1.0) { rightPower = -1.0; }
 
         leftMotor.set(leftPower);
         rightMotor.set(rightPower);
@@ -81,11 +89,9 @@ public class Climb extends SubsystemBase {
     }
 
     public void stopMotors() {
+        enabledPID = false;
         leftPower = 0.0;
         rightPower = 0.0;
-        enabledPID = false;
-        leftMotor.set(leftPower);
-        rightMotor.set(rightPower);
     }
 
     public void enablePIDHold(boolean enable) {

@@ -14,6 +14,7 @@ public class ConfigConstants {
         public static volatile double kIRight = 0.0;
         public static volatile double kDRight = 0.0;
         public static volatile double kFRight = 0.5;
+        public static volatile double pidTolerance = 50.0;
         public static volatile int holdTimeoutMS = 20000;
     }
 
