@@ -76,13 +76,27 @@ public final class Constants {
         public static final double METERS_TO_FEET = 1.0 / FEET_TO_METERS;
         public static final double DEGREES_TO_RADIANS = Math.PI / 180.0;
         public static final double RADIANS_TO_DEGREES = 180.0 / Math.PI;
-        public static final double LIFT_VOLTAGE_TO_CM = 1.0;
     }
 
     public static final class Sensors {
         public static final int ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS = 25;
         public static final double ODOMETRY_VELOCITY_SAMPLES_PER_SEC = 1000.0 / ODOMETRY_VELOCITY_SAMPLE_INTERVAL_MS;
         public static final double COLOR_MATCH_DISTANCE_THRESHOLD = 0.8;
+    }
+
+    public static final class Lift {
+        public static final double MAX_V = 3.070;
+        public static final double MIN_V = 1.680;
+        public static final double V_RANGE = MAX_V - MIN_V;
+        public static final double POT_ROTATIONS = 10.0;
+        public static final double SPOOL_CIRC_CM = 7.5819;
+        public static final double SENSOR_MAX_CM = 71.755;
+        public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / V_RANGE;
+        public enum MovementDirection {
+            NONE,
+            UP,
+            DOWN;
+        }
     }
 
     public static final class DriveControl {

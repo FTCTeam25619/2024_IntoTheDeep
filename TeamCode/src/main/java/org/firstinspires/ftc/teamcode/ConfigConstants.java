@@ -33,9 +33,46 @@ public class ConfigConstants {
 
     @Config
     public static class ScoringTiming {
+        public static volatile int preScoreWaitForLiftMS = 250;
+        public static volatile int preScoreWaitForArmMS = 0;
+        public static volatile int preScoreWaitForWristMS = 550;
         public static volatile int postScoreWaitForArmMS = 500;
         public static volatile int postScoreWaitForWristMS = 250;
-        public static volatile int preScoreWaitForWristMS = 550;
+        public static volatile int postScoreWaitForLiftMS = 500;
+        public static volatile int postScoreWaitForHomeMS = 1000;
+    }
+
+    @Config
+    public static class Lift {
+        // TODO:  The following are placeholder values!  Update them.
+        public static volatile double MIN_POS_CM = 0.0;
+        public static volatile double MAX_POS_CM = 70.0;
+
+        public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
+        public static volatile double LIFT_LOW_BASKET = 21.0;
+        public static volatile double LIFT_HI_BASKET = 62.0;
+
+        public static volatile double MAX_UP_POWER = 1.0;
+        public static volatile double MAX_UP_POWER_CLOSE = 0.4;
+        public static volatile double MAX_DOWN_POWER = -0.6;
+        public static volatile double MAX_DOWN_POWER_CLOSE = -0.25;
+        public static volatile double TARGET_SLOW_ZONE_THRESHOLD = 5.0;
+        public static volatile double HOME_SLOW_ZONE_THRESHOLD = 3.0;
+        public static volatile double LIFT_TOLERANCE_UP = 0.5;  // +/- CM
+        public static volatile double LIFT_TOLERANCE_DOWN = 0.2;  // +/- CM
+
+        @Config
+        public static class LiftPID {
+            public static volatile double kPUp = 0.07;  // Max power at 2cm error
+            public static volatile double kIUp = 0.0;
+            public static volatile double kDUp = 0.0125;
+            public static volatile double kFUp = 0.25;   // % motor power to counteract gravity
+            public static volatile double kPDown = 0.35;  // Max power at 2cm error
+            public static volatile double kIDown = 0.0;
+            public static volatile double kDDown = 0.0;
+            public static volatile double kFDown = 0.0;   // % motor power to counteract gravity
+        }
+
     }
 
     @Config
