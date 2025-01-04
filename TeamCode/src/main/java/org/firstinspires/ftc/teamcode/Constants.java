@@ -92,6 +92,11 @@ public final class Constants {
         public static final double SPOOL_CIRC_CM = 7.5819;
         public static final double SENSOR_MAX_CM = 71.755;
         public static final double LIFT_V_TO_CM = SENSOR_MAX_CM / V_RANGE;
+        public enum MovementDirection {
+            NONE,
+            UP,
+            DOWN;
+        }
     }
 
     public static final class DriveControl {

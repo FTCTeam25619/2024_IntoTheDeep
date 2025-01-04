@@ -34,7 +34,7 @@ public class MoveLiftToHeight extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        mLift.setPidEnabled(false);
+        mLift.disablePID();
     }
 
     @Override

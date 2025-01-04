@@ -27,6 +27,7 @@ public class Lift extends SubsystemBase{
 
     private PIDController liftUpPID;
     private PIDController liftDownPID;
+    private Constants.Lift.MovementDirection movementDirectionForPID = Constants.Lift.MovementDirection.NONE;
 
     public Lift(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.liftLeftMotor);
@@ -62,13 +63,22 @@ public class Lift extends SubsystemBase{
     @Override
     public void periodic() {
         if (pidEnabled) {
-            double power;
-            if (getPositionCM() <= getPidTarget()) {
-                // Going up: Power is adjusted by a constant feed forward to account for gravity
-                power = liftUpPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFUp;
-            } else {
-                // Going down: Power is adjusted by a constant feed forward to account for gravity
-                power = liftDownPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFDown;
+            double power = 0.0;
+            // Power is adjusted by a constant feed forward to account for gravity
+            double upPower = liftUpPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFUp;
+            double downPower = liftDownPID.calculate(getPositionCM(), pidTarget) + ConfigConstants.Lift.LiftPID.kFDown;
+            switch (movementDirectionForPID) {
+                case NONE:
+                    // THIS SHOULD NOT HAPPEN.
+                    power = 0.0;
+                    break;
+                case UP:
+                    // Going up
+                    power = upPower;
+                    break;
+                case DOWN:
+                    // Going down
+                    power = downPower;
             }
             // Clamp max PID speed
             if (getPositionCM() < ConfigConstants.Lift.MIN_POS_CM + ConfigConstants.Lift.HOME_SLOW_ZONE_THRESHOLD) {
@@ -87,6 +97,8 @@ public class Lift extends SubsystemBase{
             leftMotor.set(power);
             rightMotor.set(power);
         } else {
+            liftUpPID.reset();
+            liftDownPID.reset();
             leftMotor.set(manualPower);
             rightMotor.set(manualPower);
         }
@@ -109,11 +121,13 @@ public class Lift extends SubsystemBase{
         if (power < -1.0){ power = -1.0;}
 
         pidEnabled = false;
+        movementDirectionForPID = Constants.Lift.MovementDirection.NONE;
         manualPower = power;
     }
 
     public void stopMotors() {
         pidEnabled = false;
+        movementDirectionForPID = Constants.Lift.MovementDirection.NONE;
         manualPower = 0.0;
     }
 
@@ -140,16 +154,9 @@ public class Lift extends SubsystemBase{
         return this.pidTarget;
     }
 
-    /**
-     *
-     * @param enabled -- Whether to enable PID processing
-     *
-     * Use in conjunction with setPidTarget(height) which should be called first.
-     * As an alternative, you can call setHeight(height) which both sets the target and enables PID
-     *
-     */
-    public void setPidEnabled (boolean enabled) {
-        this.pidEnabled = enabled;
+    public void disablePID() {
+        this.pidEnabled = false;
+        this.movementDirectionForPID = Constants.Lift.MovementDirection.NONE;
     }
 
     /**
@@ -167,6 +174,11 @@ public class Lift extends SubsystemBase{
      */
     public void setHeight(double height) {
         setPidTarget(height);
-        setPidEnabled(true);
+        this.pidEnabled = true;
+        if (getPositionCM() < height) {
+            movementDirectionForPID = Constants.Lift.MovementDirection.UP;
+        } else {
+            movementDirectionForPID = Constants.Lift.MovementDirection.DOWN;
+        }
     }
 }
