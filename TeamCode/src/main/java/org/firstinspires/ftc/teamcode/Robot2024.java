@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
+import org.firstinspires.ftc.teamcode.commands.HoldClimb;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.subsystems.Climb;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
@@ -252,10 +253,20 @@ public class Robot2024 extends Robot {
 //
 //        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
 
-        c2Back.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower)));
-        c2Back.whenReleased(new InstantCommand(() -> climb.stopMotors()));
+        c2Back.whileHeld(new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
+        }, climb));
+        c2Back.whenReleased(
+            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry)
+        );
 
-        c2Start.whileHeld(new InstantCommand(() -> climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower)));
-        c2Start.whenReleased(new InstantCommand(() -> climb.stopMotors()));
+        c2Start.whileHeld(new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
+        }, climb));
+        c2Start.whenReleased(
+            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry)
+        );
     }
 }
