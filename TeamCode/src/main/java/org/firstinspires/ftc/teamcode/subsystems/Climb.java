@@ -19,13 +19,11 @@ public class Climb extends SubsystemBase {
     private Sensors mSensors;
     private Telemetry mTelemetry;
 
-    private PIDController leftPIDController;
-    private PIDController rightPIDController;
+    private PIDController holdPIDController;
     private double leftPower;
     private double rightPower;
     private boolean enabledPID = false;
-    private int leftPIDTarget;
-    private int rightPIDTarget;
+    private int holdPIDTarget;
 
     public Climb(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbLeftMotor);
@@ -40,19 +38,12 @@ public class Climb extends SubsystemBase {
         leftMotor.setRunMode(Motor.RunMode.RawPower);
         rightMotor.setRunMode(Motor.RunMode.RawPower);
 
-        leftPIDController = new PIDController(
-                ConfigConstants.Climb.kPLeft,
-                ConfigConstants.Climb.kILeft,
-                ConfigConstants.Climb.kDLeft
+        holdPIDController = new PIDController(
+                ConfigConstants.Climb.kP,
+                ConfigConstants.Climb.kI,
+                ConfigConstants.Climb.kD
         );
-        leftPIDController.setTolerance(ConfigConstants.Climb.pidTolerance);
-
-        rightPIDController = new PIDController(
-                ConfigConstants.Climb.kPRight,
-                ConfigConstants.Climb.kIRight,
-                ConfigConstants.Climb.kDRight
-        );
-        rightPIDController.setTolerance(ConfigConstants.Climb.pidTolerance);
+        holdPIDController.setTolerance(ConfigConstants.Climb.pidTolerance);
 
         mSensors = sensors;
         mTelemetry = telemetry;
@@ -62,26 +53,19 @@ public class Climb extends SubsystemBase {
     public void periodic() {
         mTelemetry.addData("Climb: L Enc", mSensors.climbLeftEncoderPosition);
         mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
-        mTelemetry.addData("Climb: PID L Target", leftPIDTarget);
-        mTelemetry.addData("Climb: PID R Target", rightPIDTarget);
+        mTelemetry.addData("Climb: PID Target (L motor)", holdPIDTarget);
         mTelemetry.addData("Climb: PID Hold", enabledPID);
 
         if (enabledPID) {
-            // PID hold: recalculate power via PID controllers
-            leftPower = leftPIDController.calculate() + ConfigConstants.Climb.kFLeft;
-            rightPower = rightPIDController.calculate() + ConfigConstants.Climb.kFRight;
+            // PID hold: recalculate power via PID controllers based on left motor encoder
+            leftPower = holdPIDController.calculate() + ConfigConstants.Climb.kF;
             if (leftPower > ConfigConstants.Climb.maxHoldMotorPower) {
                 leftPower = ConfigConstants.Climb.maxHoldMotorPower;
             }
             if (leftPower < -ConfigConstants.Climb.maxHoldMotorPower) {
                 leftPower = -ConfigConstants.Climb.maxHoldMotorPower;
             }
-            if (rightPower > ConfigConstants.Climb.maxHoldMotorPower) {
-                rightPower = ConfigConstants.Climb.maxHoldMotorPower;
-            }
-            if (rightPower < -ConfigConstants.Climb.maxHoldMotorPower) {
-                rightPower = -ConfigConstants.Climb.maxHoldMotorPower;
-            }
+            rightPower = leftPower;
         } else {
             // TODO: Do we need to limit these for safety beyond -1 to 1? If so, how?
             if (leftPower > 1.0) { leftPower = 1.0; }
@@ -110,21 +94,18 @@ public class Climb extends SubsystemBase {
 
     public void enablePIDHold(boolean enable) {
         if (enable) {
-            setPIDHoldTargets();
-            resetPIDControllers();
-            leftPIDController.setSetPoint(leftPIDTarget);
-            rightPIDController.setSetPoint(rightPIDTarget);
+            setPIDHoldTarget();
+            resetPIDController();
+            holdPIDController.setSetPoint(holdPIDTarget);
         }
         enabledPID = enable;
     }
 
-    private void setPIDHoldTargets() {
-        leftPIDTarget = mSensors.climbLeftEncoderPosition;
-        rightPIDTarget = mSensors.climbRightEncoderPosition;
+    private void setPIDHoldTarget() {
+        holdPIDTarget = mSensors.climbLeftEncoderPosition;
     }
 
-    private void resetPIDControllers() {
-        leftPIDController.reset();
-        rightPIDController.reset();
+    private void resetPIDController() {
+        holdPIDController.reset();
     }
 }
