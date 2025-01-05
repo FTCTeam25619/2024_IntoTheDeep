@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.graphics.Bitmap;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -68,13 +70,25 @@ public class Climb extends SubsystemBase {
             // PID hold: recalculate power via PID controllers
             leftPower = leftPIDController.calculate() + ConfigConstants.Climb.kFLeft;
             rightPower = rightPIDController.calculate() + ConfigConstants.Climb.kFRight;
+            if (leftPower > ConfigConstants.Climb.maxHoldMotorPower) {
+                leftPower = ConfigConstants.Climb.maxHoldMotorPower;
+            }
+            if (leftPower < -ConfigConstants.Climb.maxHoldMotorPower) {
+                leftPower = -ConfigConstants.Climb.maxHoldMotorPower;
+            }
+            if (rightPower > ConfigConstants.Climb.maxHoldMotorPower) {
+                rightPower = ConfigConstants.Climb.maxHoldMotorPower;
+            }
+            if (rightPower < -ConfigConstants.Climb.maxHoldMotorPower) {
+                rightPower = -ConfigConstants.Climb.maxHoldMotorPower;
+            }
+        } else {
+            // TODO: Do we need to limit these for safety beyond -1 to 1? If so, how?
+            if (leftPower > 1.0) { leftPower = 1.0; }
+            if (leftPower < -1.0) { leftPower = -1.0; }
+            if (rightPower > 1.0) { rightPower = 1.0; }
+            if (rightPower < -1.0) { rightPower = -1.0; }
         }
-
-        // TODO: Do we need to limit these for safety beyond -1 to 1? If so, how?
-        if (leftPower > 1.0) { leftPower = 1.0; }
-        if (leftPower < -1.0) { leftPower = -1.0; }
-        if (rightPower > 1.0) { rightPower = 1.0; }
-        if (rightPower < -1.0) { rightPower = -1.0; }
 
         leftMotor.set(leftPower);
         rightMotor.set(rightPower);
