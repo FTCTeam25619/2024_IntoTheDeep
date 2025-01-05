@@ -39,16 +39,18 @@ public class RobotState {
     }
 
     public enum DriveMode {
-        ROBOT_CENTRIC_CUSTOM(false, false),
-        FIELD_CENTRIC_CUSTOM(true, false),
-        ROBOT_CENTRIC_FTCLIB(false, true),
-        FIELD_CENTRIC_FTCLIB(true, true);
+        ROBOT_CENTRIC_CUSTOM(false, false, false),
+        FIELD_CENTRIC_CUSTOM(true, true, false),
+        ROBOT_CENTRIC_FTCLIB(false, false, true),
+        FIELD_CENTRIC_FTCLIB(true, true, true);
 
         public final boolean fieldCentric;
+        public final boolean fieldCentricPointToTurn;
         public final boolean ftcLibDriveControl;
 
-        private DriveMode(boolean isFieldCentric, boolean useFTCLib) {
+        private DriveMode(boolean isFieldCentric, boolean usePointToTurn, boolean useFTCLib) {
             this.fieldCentric = isFieldCentric;
+            this.fieldCentricPointToTurn = isFieldCentric && usePointToTurn;
             this.ftcLibDriveControl = useFTCLib;
         }
     }

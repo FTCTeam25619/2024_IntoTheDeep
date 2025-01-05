@@ -70,6 +70,10 @@ public class Drivetrain extends SubsystemBase {
         mTelemetry.addData("Dt: Gyro Heading", mSensors.gyroHeadingDegrees);
     }
 
+    public double getGyroHeadingRad() {
+        return mSensors.getGyroHeadingRad();
+    }
+
     public void stopDrive(){
         frontLeftWheel.set(0.0);
         frontRightWheel.set(0.0);

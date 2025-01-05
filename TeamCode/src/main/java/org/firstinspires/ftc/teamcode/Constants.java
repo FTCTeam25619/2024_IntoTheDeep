@@ -114,9 +114,12 @@ public final class Constants {
 
         // joystick control deadzone for turn in [-1,1] range;
         public static final double TURN_DEADZONE_THRESHOLD_RAW = 0.1;
+        public static final double POINT_TO_TURN_DEADZONE_THRESHOLD_RAW = 0.65;
 
         public static final double TURN_SPEED_LIMIT_DPS = 120.0;
         public static final double TURN_SPEED_LIMIT_RPS = TURN_SPEED_LIMIT_DPS * ConversionFactors.DEGREES_TO_RADIANS;
+        public static final double TURN_MIN_ANGLE_DEG = 1.0;
+        public static final double TURN_MIN_ANGLE_RAD = TURN_MIN_ANGLE_DEG * ConversionFactors.DEGREES_TO_RADIANS;
         public static final double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
         public static final double SLOW_DRIVE_MODE_TURN_FACTOR = 2.5;
     }

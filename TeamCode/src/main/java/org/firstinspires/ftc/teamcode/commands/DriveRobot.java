@@ -31,19 +31,21 @@ public class DriveRobot extends CommandBase {
     public void execute() {
         double rawY = mController1.getLeftY();
         double rawX = mController1.getLeftX();
-        double rawTurn = mController1.getRightX();
+        double rawTurnY = mController1.getRightY();
+        double rawTurnX = mController1.getRightX();
 
         if (Constants.RobotModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Y input raw", rawY);
             mTelemetry.addData("X input raw", rawX);
-            mTelemetry.addData("Turn input raw", rawTurn);
+            mTelemetry.addData("Turn Y input raw (PTT)", rawTurnY);
+            mTelemetry.addData("Turn X input raw", rawTurnX);
         }
 
         // Transform raw inputs to coordinate system:
         // X+ forward, Y+ left, Turn+ CCW
         double x = rawY;
         double y = rawX;
-        double turn = -rawTurn;
+        double turn = -rawTurnX;
         if (Constants.RobotModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Y input signed", y);
             mTelemetry.addData("X input signed", x);
@@ -56,9 +58,15 @@ public class DriveRobot extends CommandBase {
         power = this.prepareDriveInputs(power,
                 Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW,
                 Constants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
-        turn = this.prepareDriveInputs(turn,
-                Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
-                Constants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
+        if (mRobotState.robotDriveMode.fieldCentricPointToTurn) {
+            turn = this.preparePointToTurn(rawTurnX, rawTurnY,
+                    Constants.DriveControl.POINT_TO_TURN_DEADZONE_THRESHOLD_RAW,
+                    Constants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
+        } else {
+            turn = this.prepareDriveInputs(turn,
+                    Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
+                    Constants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
+        }
 
         mTelemetry.addData("Drive power final", power);
         mTelemetry.addData("Drive angle final", theta);
@@ -93,6 +101,46 @@ public class DriveRobot extends CommandBase {
         prepared = DriveHelpers.smoothJoystick(prepared);
         if (mRobotState.slowDriveMode) {
             prepared /= slowModeFactor;
+        }
+        return prepared;
+    }
+
+    /*
+     * Prepare turn input by doing the following:
+     *   - Applying the provided joystick dead band
+     *   - Calculating the angle to turn to based on the current IMU heading
+     *   - Applying scaling for slow mode as needed
+     */
+    private double preparePointToTurn(double inputX, double inputY, double deadBandSize, double slowModeFactor) {
+        // Convert inputs to angle target
+        double inputAngleRad = -Math.atan2(inputY, inputX);
+        // Check whether the inputs magnitude is within the dead band
+        boolean inDeadBand = Math.hypot(inputY, inputX) <= deadBandSize;
+        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Drive PTT angle in dead band", inDeadBand);
+        }
+        if (inDeadBand) {
+            // If within dead band, zero the turn angle
+            if (Constants.RobotModes.DEBUG_TELEMETRY) {
+                mTelemetry.addData("Drive turn angle final", 0.0);
+            }
+            return 0.0;
+        }
+        double prepared = (mSubsystem.getGyroHeadingRad() - inputAngleRad);
+        double speedLimit = Constants.DriveControl.TURN_SPEED_LIMIT_RPS;
+        if (mRobotState.slowDriveMode) { speedLimit /= slowModeFactor; }
+        // Apply slow mode on the speed limit, not the input
+        if (Math.abs(prepared) > speedLimit) {
+            // If we're above the turn speed limit with this target, limit amount
+            // of turn for this cycle
+            prepared = Math.signum(prepared) * speedLimit;
+        }
+        if (Math.abs(prepared) <= Constants.DriveControl.TURN_MIN_ANGLE_RAD) {
+            // If we're below the min angle to execute a turn, zero the turn angle
+            prepared = 0.0;
+        }
+        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Drive turn angle final", prepared);
         }
         return prepared;
     }
