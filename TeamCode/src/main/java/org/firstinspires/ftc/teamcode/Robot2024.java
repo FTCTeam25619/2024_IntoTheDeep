@@ -103,8 +103,8 @@ public class Robot2024 extends Robot {
                 requirements.add(intake);
                 requirements.add(lift);
                 requirements.add(depositor);
-                TestAutoAction action = new TestAutoAction();
-                CommandScheduler.getInstance().schedule(new TestAuto(action, requirements));
+                TestAutoAction action = new TestAutoAction(Robot2024.telemetry);
+                CommandScheduler.getInstance().schedule(new TestAuto(action, requirements, Robot2024.telemetry));
                 break;
             case DRIVE_STICKS_TELEOP:
                 // Left and Right Sticks

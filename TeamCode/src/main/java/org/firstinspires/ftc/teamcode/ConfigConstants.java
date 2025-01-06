@@ -101,6 +101,11 @@ public class ConfigConstants {
     }
 
     @Config
+    public static class AutoTesting {
+        public static volatile int cyclesToCount = 1000;
+    }
+
+    @Config
     public static class TestPositions {
         public static volatile double slideLeftTest = 0.23;
         public static volatile double slideRightTest = 0.015;
