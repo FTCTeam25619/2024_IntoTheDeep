@@ -29,8 +29,8 @@ public class Climb extends SubsystemBase {
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbLeftMotor);
         rightMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbRightMotor);
 
-        leftMotor.setInverted(true);
-        rightMotor.setInverted(false);
+        leftMotor.setInverted(false);
+        rightMotor.setInverted(true);
 
         leftMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);

@@ -87,9 +87,16 @@ public class ConfigConstants {
     }
 
     @Config
-    public static class HandoffTiming {
-        public static volatile int waitBeforeEject = 50;
-        public static volatile int waitAfterPiece = 10;
+    public static class DriveControl {
+
+        // joystick control deadzone for drive power (in polar coordinates) in [-1,1] range
+        public static volatile double POWER_DEADZONE_THRESHOLD_RAW = 0.1 * Math.sqrt(2.0);
+
+        // joystick control deadzone for turn in [-1,1] range;
+        public static volatile double TURN_DEADZONE_THRESHOLD_RAW = 0.1;
+
+        public static volatile double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
+        public static volatile double SLOW_DRIVE_MODE_TURN_FACTOR = 4.0;
     }
 
     @Config
