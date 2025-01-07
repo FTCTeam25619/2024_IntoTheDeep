@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
@@ -54,11 +55,11 @@ public class DriveRobot extends CommandBase {
         double power = Math.hypot(y, x);
         double theta = -Math.atan2(y, x);
         power = this.prepareDriveInputs(power,
-                Constants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW,
-                Constants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
+                ConfigConstants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW,
+                ConfigConstants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
         turn = this.prepareDriveInputs(turn,
-                Constants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
-                Constants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
+                ConfigConstants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
+                ConfigConstants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
 
         mTelemetry.addData("Drive power final", power);
         mTelemetry.addData("Drive angle final", theta);

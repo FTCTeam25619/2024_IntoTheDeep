@@ -110,16 +110,8 @@ public final class Constants {
         // real achievable percentage of theoretical max drive speed
         public static final double ACHIEVABLE_MAX_DRIVE_SPEED_FACTOR = 0.90;
 
-        // joystick control deadzone for drive power (in polar coordinates) in [-1,1] range
-        public static final double POWER_DEADZONE_THRESHOLD_RAW = 0.1 * Math.sqrt(2.0);
-
-        // joystick control deadzone for turn in [-1,1] range;
-        public static final double TURN_DEADZONE_THRESHOLD_RAW = 0.1;
-
         public static final double TURN_SPEED_LIMIT_DPS = 120.0;
         public static final double TURN_SPEED_LIMIT_RPS = TURN_SPEED_LIMIT_DPS * ConversionFactors.DEGREES_TO_RADIANS;
-        public static final double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
-        public static final double SLOW_DRIVE_MODE_TURN_FACTOR = 2.5;
     }
 
     public static final class DriveBase {
@@ -211,6 +203,17 @@ public final class Constants {
             private SweepSetPosition(double position) {
                 this.position = position;
             }
+        }
+    }
+
+    public static enum ScoringPosition {
+        LOW_BASKET(ConfigConstants.Lift.LIFT_LOW_BASKET),
+        HIGH_BASKET(ConfigConstants.Lift.LIFT_HI_BASKET);
+
+        public final double liftPosition;
+
+        private ScoringPosition(double liftPosition) {
+            this.liftPosition = liftPosition;
         }
     }
 
