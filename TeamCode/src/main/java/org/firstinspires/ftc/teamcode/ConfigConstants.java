@@ -102,6 +102,7 @@ public class ConfigConstants {
         public static volatile double gripTest = 0.2;
         public static volatile double armLeftTest = 0.8;
         public static volatile double armRightTest = 0.175;
+        public static volatile double sweepTest = 0.0;
     }
 }
 

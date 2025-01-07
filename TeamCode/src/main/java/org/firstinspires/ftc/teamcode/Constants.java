@@ -38,6 +38,7 @@ public final class Constants {
         public static final String depositorWristServo = "depositor_wrist";
         public static final String depositorGripServo = "depositor_grip";
         public static final String depositorColorSensor = "depositor_color";
+        public static final String sweepServo = "sweep";
     }
 
     public static final class OctoQuad {
@@ -197,6 +198,17 @@ public final class Constants {
             public final double position;
 
             private GripSetPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static enum SweepSetPosition {
+            HOME(0.005),
+            SWEEP(0.05);
+
+            public final double position;
+
+            private SweepSetPosition(double position) {
                 this.position = position;
             }
         }

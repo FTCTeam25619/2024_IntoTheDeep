@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.Robot;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
+import org.firstinspires.ftc.teamcode.subsystems.Sweep;
 
 
 /* To connect to the Control Hub device via Wi-Fi:
@@ -46,6 +48,7 @@ public class Robot2024 extends Robot {
     private final Intake intake;
     private final Depositor depositor;
     private final Climb climb;
+    private final Sweep sweep;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -77,6 +80,7 @@ public class Robot2024 extends Robot {
         intake = new Intake(hardwareMap, Robot2024.telemetry);
         depositor = new Depositor(hardwareMap, Robot2024.telemetry);
         climb = new Climb(hardwareMap, sensors, Robot2024.telemetry);
+        sweep = new Sweep(hardwareMap, Robot2024.telemetry);
     }
 
     public void initOpMode() {
@@ -142,16 +146,10 @@ public class Robot2024 extends Robot {
         c1LeftBumper.whenReleased(new InstantCommand(() -> robotState.setSlowDriveMode(false)));
 
         // Extend intake
-        c1RightBumper.whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
-                        new WaitCommand(10),
-                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
-                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
-                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
-                )
-        );
+        c1RightBumper.whenPressed(extendIntake());
+
+        c1Back.whileHeld(sweepOut());
+        c1Back.whenReleased(sweepIn());
 
         // Pivot position tuning
 //        c1Back.whenPressed(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
@@ -186,61 +184,17 @@ public class Robot2024 extends Robot {
         c2B.whenPressed(new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_HI_BASKET));
 
         // After piece intake, handoff to depositor
-        c2LeftBumper.whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
-                        new WaitCommand(850),
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
-                        new WaitCommand(50),
-                        new AwaitGamePiece(depositor),
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL)),
-                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL))
-                )
-        );
+        c2LeftBumper.whenPressed(handoffPiece());
 
         // Press & hold to move to scoring position, release to score
-        c2RightBumper.whenPressed(new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL);
-                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
-                }),
-                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForLiftMS),
-                new ParallelCommandGroup(
-                        new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_HI_BASKET),
-                        new SequentialCommandGroup(
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
-                                new InstantCommand(() -> {
-                                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
-                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
-                                }),
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
-                                new InstantCommand(() -> {
-                                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
-                                })
-                        )
-                )
-        ));
-        c2RightBumper.whenReleased(
-                new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForArmMS),
-                                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
-                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForWristMS),
-                                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE)),
-                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForHomeMS),
-                                new InstantCommand(() -> {
-                                    intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
-                                    intake.slideToPosition(Constants.Intake.SlideSetPosition.IN);
-                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME);
-                                })
-                        ),
-                        new SequentialCommandGroup(
-                                new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForLiftMS),
-                                new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_DOWN_POS)
-                        )
-                )
-        );
+        c2RightBumper.whenPressed(moveToScoringPosition(ConfigConstants.Lift.LIFT_HI_BASKET));
+        c2RightBumper.whenReleased(scoreBasketAndReturnHome());
+
+        c2Back.whileHeld(moveClimbHooksUp());
+        c2Back.whenReleased(holdClimb());
+
+        c2Start.whileHeld(moveClimbHooksDown());
+        c2Start.whenReleased(holdClimb());
 
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> intake.slideLeftToTestPosition()));
 //        c2LeftBumper.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
@@ -253,20 +207,101 @@ public class Robot2024 extends Robot {
 //
 //        c2Start.whileHeld(new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)));
 
-        c2Back.whileHeld(new InstantCommand(() -> {
+//        c1Back.whenPressed(new InstantCommand(() -> sweep.sweepToTestPosition()));
+    }
+
+    Command extendIntake() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
+                new WaitCommand(10),
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+        );
+    }
+
+    Command handoffPiece() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
+                new WaitCommand(850),
+                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
+                new WaitCommand(50),
+                new AwaitGamePiece(depositor),
+                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL)),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL))
+        );
+    }
+
+    Command sweepOut() {
+         return new InstantCommand(() -> sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.SWEEP));
+    }
+
+    Command sweepIn() {
+        return new InstantCommand(() -> sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.HOME));
+    }
+
+    Command moveToScoringPosition(double scoringPosition) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL);
+                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
+                }),
+                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForLiftMS),
+                new ParallelCommandGroup(
+                        new MoveLiftToHeight(lift, scoringPosition),
+                        new SequentialCommandGroup(
+                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
+                                new InstantCommand(() -> {
+                                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                                }),
+                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
+                                new InstantCommand(() -> {
+                                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
+                                })
+                        )
+                )
+        );
+    }
+
+    Command scoreBasketAndReturnHome() {
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                        new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForArmMS),
+                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
+                        new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForWristMS),
+                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE)),
+                        new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForHomeMS),
+                        new InstantCommand(() -> {
+                            intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
+                            intake.slideToPosition(Constants.Intake.SlideSetPosition.IN);
+                            depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME);
+                        })
+                ),
+                new SequentialCommandGroup(
+                        new WaitCommand(ConfigConstants.ScoringTiming.postScoreWaitForLiftMS),
+                        new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_DOWN_POS)
+                )
+        );
+    }
+
+    Command moveClimbHooksUp() {
+        return new InstantCommand(() -> {
             climb.enablePIDHold(false);
             climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
-        }, climb));
-        c2Back.whenReleased(
-            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry)
-        );
+        }, climb);
+    }
 
-        c2Start.whileHeld(new InstantCommand(() -> {
+    Command moveClimbHooksDown() {
+        return new InstantCommand(() -> {
             climb.enablePIDHold(false);
             climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
-        }, climb));
-        c2Start.whenReleased(
-            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry)
-        );
+        }, climb);
+    }
+
+    Command holdClimb() {
+        return new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
     }
 }
