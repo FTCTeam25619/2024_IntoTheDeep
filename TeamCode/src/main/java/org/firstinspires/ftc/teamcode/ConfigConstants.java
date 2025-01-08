@@ -6,13 +6,14 @@ import com.acmerobotics.dashboard.config.Config;
 public class ConfigConstants {
     @Config
     public static class Climb {
-        public static volatile double kP = 0.1;
+        public static volatile double kP = 0.0001;
         public static volatile double kI = 0.0;
         public static volatile double kD = 0.0;
         public static volatile double kF = 0.0;
-        public static volatile double pidTolerance = 2000.0;
+        public static volatile double pidTolerance = 500.0;
         public static volatile int holdTimeoutMS = 20000;
         public static volatile double maxHoldMotorPower = 0.1;
+        public static volatile int movementBufferCounts = 400;
     }
 
     @Config

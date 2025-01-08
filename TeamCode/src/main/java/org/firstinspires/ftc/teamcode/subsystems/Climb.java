@@ -26,6 +26,8 @@ public class Climb extends SubsystemBase {
     private int holdPIDTarget;
     private int countPIDTargets = 0;
     private int countPIDResets = 0;
+    private double calculatedPIDpower = 0.0;
+    private int bufferMultiplier = 1;
 
     public Climb(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbLeftMotor);
@@ -62,7 +64,8 @@ public class Climb extends SubsystemBase {
 
         if (enabledPID) {
             // PID hold: recalculate power via PID controllers based on left motor encoder
-            leftPower = holdPIDController.calculate() + ConfigConstants.Climb.kF;
+            calculatedPIDpower = holdPIDController.calculate(mSensors.climbLeftEncoderPosition);
+            leftPower = calculatedPIDpower + ConfigConstants.Climb.kF;
             if (leftPower > ConfigConstants.Climb.maxHoldMotorPower) {
                 leftPower = ConfigConstants.Climb.maxHoldMotorPower;
             }
@@ -77,6 +80,17 @@ public class Climb extends SubsystemBase {
             if (rightPower > 1.0) { rightPower = 1.0; }
             if (rightPower < -1.0) { rightPower = -1.0; }
         }
+
+        if (leftPower > 0.0) { bufferMultiplier = 1; } else { bufferMultiplier = -1; }
+
+        if ((leftPower > -0.05 && leftPower < 0.05) || (rightPower > -0.05 && rightPower < 0.05)) {
+            leftPower = 0.0;
+            rightPower = 0.0;
+        }
+
+        mTelemetry.addData("Climb: PID power", calculatedPIDpower);
+        mTelemetry.addData("Climb: leftPower", leftPower);
+        mTelemetry.addData("Climb: rightPower", rightPower);
 
         leftMotor.set(leftPower);
         rightMotor.set(rightPower);
@@ -107,7 +121,8 @@ public class Climb extends SubsystemBase {
 
     private void setPIDHoldTarget() {
         countPIDTargets++;
-        holdPIDTarget = mSensors.climbLeftEncoderPosition;
+        holdPIDTarget = mSensors.climbLeftEncoderPosition +
+                bufferMultiplier * ConfigConstants.Climb.movementBufferCounts;
     }
 
     private void resetPIDController() {
