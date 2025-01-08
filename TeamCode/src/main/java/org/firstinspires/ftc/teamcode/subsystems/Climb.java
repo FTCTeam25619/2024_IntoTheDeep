@@ -24,13 +24,17 @@ public class Climb extends SubsystemBase {
     private double rightPower;
     private boolean enabledPID = false;
     private int holdPIDTarget;
+    private int countPIDTargets = 0;
+    private int countPIDResets = 0;
+    private double calculatedPIDpower = 0.0;
+    private int bufferMultiplier = 1;
 
     public Climb(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbLeftMotor);
         rightMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbRightMotor);
 
-        leftMotor.setInverted(false);
-        rightMotor.setInverted(true);
+        leftMotor.setInverted(true);
+        rightMotor.setInverted(false);
 
         leftMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -55,10 +59,13 @@ public class Climb extends SubsystemBase {
         mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
         mTelemetry.addData("Climb: PID Target (L motor)", holdPIDTarget);
         mTelemetry.addData("Climb: PID Hold", enabledPID);
+        mTelemetry.addData("Climb: PID Targets set", countPIDTargets);
+        mTelemetry.addData("Climb: PID Controller resets", countPIDResets);
 
         if (enabledPID) {
             // PID hold: recalculate power via PID controllers based on left motor encoder
-            leftPower = holdPIDController.calculate() + ConfigConstants.Climb.kF;
+            calculatedPIDpower = holdPIDController.calculate(mSensors.climbLeftEncoderPosition);
+            leftPower = calculatedPIDpower + ConfigConstants.Climb.kF;
             if (leftPower > ConfigConstants.Climb.maxHoldMotorPower) {
                 leftPower = ConfigConstants.Climb.maxHoldMotorPower;
             }
@@ -73,6 +80,17 @@ public class Climb extends SubsystemBase {
             if (rightPower > 1.0) { rightPower = 1.0; }
             if (rightPower < -1.0) { rightPower = -1.0; }
         }
+
+        if (leftPower > 0.0) { bufferMultiplier = 1; } else { bufferMultiplier = -1; }
+
+        if ((leftPower > -0.05 && leftPower < 0.05) || (rightPower > -0.05 && rightPower < 0.05)) {
+            leftPower = 0.0;
+            rightPower = 0.0;
+        }
+
+        mTelemetry.addData("Climb: PID power", calculatedPIDpower);
+        mTelemetry.addData("Climb: leftPower", leftPower);
+        mTelemetry.addData("Climb: rightPower", rightPower);
 
         leftMotor.set(leftPower);
         rightMotor.set(rightPower);
@@ -102,10 +120,13 @@ public class Climb extends SubsystemBase {
     }
 
     private void setPIDHoldTarget() {
-        holdPIDTarget = mSensors.climbLeftEncoderPosition;
+        countPIDTargets++;
+        holdPIDTarget = mSensors.climbLeftEncoderPosition +
+                bufferMultiplier * ConfigConstants.Climb.movementBufferCounts;
     }
 
     private void resetPIDController() {
+        countPIDResets++;
         holdPIDController.reset();
     }
 }

@@ -21,6 +21,9 @@ import org.firstinspires.ftc.teamcode.commands.HoldClimb;
 import org.firstinspires.ftc.teamcode.commands.IntakePiece;
 import org.firstinspires.ftc.teamcode.commands.ManualControlClimb;
 import org.firstinspires.ftc.teamcode.commands.ManualControlLift;
+import org.firstinspires.ftc.teamcode.lib.triggers.LeftStickY;
+import org.firstinspires.ftc.teamcode.lib.triggers.RightStickY;
+import org.firstinspires.ftc.teamcode.lib.triggers.TriggerButton;
 import org.firstinspires.ftc.teamcode.subsystems.Climb;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
 import org.firstinspires.ftc.teamcode.commands.MoveLiftToHeight;
@@ -90,10 +93,6 @@ public class Robot2024 extends Robot {
             case DRIVE_STICKS_TELEOP:
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
-                // Left and Right Triggers
-                intake.setDefaultCommand(new IntakePiece(intake, controller2, Robot2024.telemetry));
-                // Y axis on Controller 2 Right Stick
-                climb.setDefaultCommand(new ManualControlClimb(climb, controller2, 0.6));
         }
         setupGamepadButtonMappings();
     }
@@ -160,6 +159,10 @@ public class Robot2024 extends Robot {
 
     private void setupController2ButtonMappings() {
         // Setup controller 2 buttons
+        LeftStickY c2LeftStickYUp = new LeftStickY(controller2, 0.6);
+        LeftStickY c2LeftStickYDown = new LeftStickY(controller2, -0.6);
+        RightStickY c2RightStickYUp = new RightStickY(controller2, 0.6);
+        RightStickY c2RightStickYDown = new RightStickY(controller2, -0.6);
         GamepadButton c2DPadUp = new GamepadButton(controller2, GamepadKeys.Button.DPAD_UP);
         GamepadButton c2DPadDown = new GamepadButton(controller2, GamepadKeys.Button.DPAD_DOWN);
         GamepadButton c2DPadLeft = new GamepadButton(controller2, GamepadKeys.Button.DPAD_LEFT);
@@ -170,6 +173,8 @@ public class Robot2024 extends Robot {
         GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
         GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
         GamepadButton c2RightBumper = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_BUMPER);
+        TriggerButton c2LeftTrigger = new TriggerButton(controller2, GamepadKeys.Trigger.LEFT_TRIGGER, 0.6);
+        TriggerButton c2RightTrigger = new TriggerButton(controller2, GamepadKeys.Trigger.RIGHT_TRIGGER, 0.6);
         GamepadButton c2LeftStickPress = new GamepadButton(controller2, GamepadKeys.Button.LEFT_STICK_BUTTON);
         GamepadButton c2RightStickPress = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
         GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
@@ -177,7 +182,15 @@ public class Robot2024 extends Robot {
 
         // Map controller 2 buttons to commands
         // Left stick is mapped to Manual Lift movement up and down
+        c2LeftStickYUp.whileActiveContinuous(moveLiftUp());
+        c2LeftStickYUp.whenInactive(stopLift());
+        c2LeftStickYDown.whileActiveContinuous(moveLiftDown());
+        c2LeftStickYDown.whenInactive(stopLift());
         // Right stick is mapped to Manual Climb hooks movement up and down
+        c2RightStickYUp.whileActiveContinuous(moveClimbHooksUp());
+        c2RightStickYUp.whenInactive(holdClimb());
+        c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
+        c2RightStickYDown.whenInactive(holdClimb());
         // Right and left triggers are mapped to Manual Intake wheels movement in (intake) and out (eject) respectively
 
         // Press and hold DPad Up to sweep in front of the robot. Sweeper bar will return when released.
@@ -185,10 +198,10 @@ public class Robot2024 extends Robot {
         c2DPadUp.whenReleased(sweepIn());
 
         // Enable/Disable Lift manual control: Y axis on Controller 2 Left Stick
-        c2DPadDown.toggleWhenPressed(
-                new ManualControlLift(lift, controller2, 0.6),
-                true
-        );
+//        c2DPadDown.toggleWhenPressed(
+//                new ManualControlLift(lift, controller2, 0.6),
+//                true
+//        );
 
         // A B X Y move the lift and depositor to scoring positions
         // B and Y do low and high basket positions respectively
@@ -198,6 +211,12 @@ public class Robot2024 extends Robot {
 
         c2LeftBumper.whenPressed(handoffPiece());
         c2RightBumper.whenPressed(extendIntake());
+
+        c2LeftTrigger.whileActiveContinuous(manualOuttake());
+        c2LeftTrigger.whenInactive(stopIntakeWheels());
+
+        c2RightTrigger.whileActiveContinuous(manualIntake());
+        c2RightTrigger.whenInactive(stopIntakeWheels());
 
         c2Back.whenPressed(neutralPosition());
         c2Start.whenPressed(resetPosition());
@@ -346,6 +365,18 @@ public class Robot2024 extends Robot {
 
     Command stopLift() {
         return new InstantCommand(lift::stopMotors);
+    }
+
+    Command manualIntake() {
+        return new InstantCommand(intake::intakePiece);
+    }
+
+    Command manualOuttake() {
+        return new InstantCommand(intake::outtakePiece);
+    }
+
+    Command stopIntakeWheels() {
+        return new InstantCommand(intake::stopIntake);
     }
 
     Command resetGyro() {

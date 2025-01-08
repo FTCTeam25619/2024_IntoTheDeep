@@ -37,9 +37,9 @@ public class HoldClimb extends CommandBase {
         startTimeMS = SystemClock.elapsedRealtime();
         endTimeMS = startTimeMS + holdDurationMS;
         if (Constants.RobotModes.DEBUG_TELEMETRY) {
-            mTelemetry.addData("HoldClimb: start (ms)", startTimeMS);
-            mTelemetry.addData("HoldClimb: end (ms)", endTimeMS);
-            mTelemetry.addData("HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());
+            mTelemetry.addData("Climb/HoldClimb: start (ms)", startTimeMS);
+            mTelemetry.addData("Climb/HoldClimb: end (ms)", endTimeMS);
+            mTelemetry.addData("Climb/HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());
         }
     }
 
@@ -47,9 +47,9 @@ public class HoldClimb extends CommandBase {
     public void execute() {
         // Nothing more needed
         if (Constants.RobotModes.DEBUG_TELEMETRY) {
-            mTelemetry.addData("HoldClimb: start (ms)", startTimeMS);
-            mTelemetry.addData("HoldClimb: end (ms)", endTimeMS);
-            mTelemetry.addData("HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());
+            mTelemetry.addData("Climb/HoldClimb: start (ms)", startTimeMS);
+            mTelemetry.addData("Climb/HoldClimb: end (ms)", endTimeMS);
+            mTelemetry.addData("Climb/HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());
         }
     }
 
