@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
+import org.firstinspires.ftc.teamcode.lib.GamePieceColor;
+
 public final class Constants {
 
     public static final class DebugModes {
@@ -222,19 +224,34 @@ public final class Constants {
             TELEOP,
             AUTO;
         }
+
+        public enum AllianceColor {
+            RED(GamePieceColor.RED),
+            BLUE(GamePieceColor.BLUE);
+
+            public final GamePieceColor gamePieceColor;
+
+            private AllianceColor(GamePieceColor gamepieceColor) {
+                this.gamePieceColor = gamepieceColor;
+            }
+        }
         
         public enum OpModeSelection{
-            DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
+            DRIVE_STICKS_TELEOP_RED(OpModeType.TELEOP, AllianceColor.RED),
+            DRIVE_STICKS_TELEOP_BLUE(OpModeType.TELEOP, AllianceColor.BLUE);
 
             private OpModeType opModeType;
+            private AllianceColor allianceColor;
 
-            private OpModeSelection(OpModeType opmodeTypeSetting){
+            private OpModeSelection(OpModeType opmodeTypeSetting, AllianceColor color){
                 opModeType = opmodeTypeSetting;
+                allianceColor = color;
             }
 
             public OpModeType getOpModeType(){
                 return opModeType;
             }
+            public AllianceColor getAllianceColor() { return allianceColor; }
         }
     }
 }
