@@ -185,7 +185,7 @@ public final class Constants {
 
         public static enum GripSetPosition {
             OPEN(0.2),
-            CLOSED(0.65);
+            CLOSED(0.7);
 
             public final double position;
 

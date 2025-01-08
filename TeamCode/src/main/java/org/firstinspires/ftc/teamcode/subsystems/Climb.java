@@ -24,13 +24,15 @@ public class Climb extends SubsystemBase {
     private double rightPower;
     private boolean enabledPID = false;
     private int holdPIDTarget;
+    private int countPIDTargets = 0;
+    private int countPIDResets = 0;
 
     public Climb(HardwareMap hardwareMap, Sensors sensors, Telemetry telemetry){
         leftMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbLeftMotor);
         rightMotor = new Motor(hardwareMap, Constants.HardwareMapping.climbRightMotor);
 
-        leftMotor.setInverted(false);
-        rightMotor.setInverted(true);
+        leftMotor.setInverted(true);
+        rightMotor.setInverted(false);
 
         leftMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -55,6 +57,8 @@ public class Climb extends SubsystemBase {
         mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
         mTelemetry.addData("Climb: PID Target (L motor)", holdPIDTarget);
         mTelemetry.addData("Climb: PID Hold", enabledPID);
+        mTelemetry.addData("Climb: PID Targets set", countPIDTargets);
+        mTelemetry.addData("Climb: PID Controller resets", countPIDResets);
 
         if (enabledPID) {
             // PID hold: recalculate power via PID controllers based on left motor encoder
@@ -102,10 +106,12 @@ public class Climb extends SubsystemBase {
     }
 
     private void setPIDHoldTarget() {
+        countPIDTargets++;
         holdPIDTarget = mSensors.climbLeftEncoderPosition;
     }
 
     private void resetPIDController() {
+        countPIDResets++;
         holdPIDController.reset();
     }
 }
