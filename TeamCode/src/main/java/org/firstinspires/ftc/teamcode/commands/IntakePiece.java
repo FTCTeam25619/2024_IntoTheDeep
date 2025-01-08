@@ -6,23 +6,24 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.ConfigConstants;
+import org.firstinspires.ftc.teamcode.Constants.OpModes.AllianceColor;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
 public class IntakePiece  extends CommandBase {
     private final GamepadEx mController2;
     private final Intake mSubsystem;
     private final Telemetry mTelemetry;
+    private final AllianceColor allianceColor;
 
     private boolean pieceSeen;
-    private int countAfterPiece;
 
-    public IntakePiece(Intake subsystem, GamepadEx controller2, Telemetry telemetry) {
+    public IntakePiece(Intake subsystem, GamepadEx controller2, AllianceColor allianceColor, Telemetry telemetry) {
         this.mSubsystem = subsystem;
         this.mController2 = controller2;
         this.mTelemetry = telemetry;
+        this.allianceColor = allianceColor;
 
         pieceSeen = false;
-        countAfterPiece = 0;
 
         addRequirements(subsystem);
     }
@@ -33,28 +34,18 @@ public class IntakePiece  extends CommandBase {
         double rightTrigger = this.mController2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         boolean cmdIntake = rightTrigger > 0.0;
         boolean cmdOuttake = leftTrigger > 0.0;
-        pieceSeen = pieceSeen || mSubsystem.seeingPiece();
+        pieceSeen = pieceSeen || mSubsystem.seeingPiece(allianceColor);
         if (!cmdIntake) {
             pieceSeen = false;
-            countAfterPiece = 0;
         }
         boolean stopping = cmdIntake && pieceSeen;
         boolean intaking = cmdIntake && !stopping;
         boolean outtaking = cmdOuttake && !cmdIntake;
         if (intaking) {
             mSubsystem.intakePiece();
-            countAfterPiece = 0;
         } else if (stopping) {
             mSubsystem.stopIntake();
-            if (countAfterPiece >= ConfigConstants.IntakeTiming.cycleWaitAfterPiece) {
-                pieceSeen = false;
-                countAfterPiece = 0;
-            } else {
-                countAfterPiece++;
-                if (countAfterPiece <= ConfigConstants.IntakeTiming.cyclesReverse) {
-                    mSubsystem.outtakePiece();
-                }
-            }
+            pieceSeen = false;
         } else if (outtaking) {
             mSubsystem.outtakePiece();
         } else {
@@ -64,7 +55,6 @@ public class IntakePiece  extends CommandBase {
         mTelemetry.addData("IntakePiece: stopping", stopping);
         mTelemetry.addData("IntakePiece: outtaking", outtaking);
         mTelemetry.addData("IntakePiece: Seen?", pieceSeen);
-        mTelemetry.addData("IntakePiece: count", countAfterPiece);
         mTelemetry.addData("IntakePiece: done?", false);
     }
 

@@ -129,10 +129,21 @@ public class Intake extends SubsystemBase{
         return hsv[0];
     }
 
-    public boolean seeingPiece() {
+    public boolean seeingAnyPiece() {
         float hue = getHue();
         return GamePieceColor.BLUE.matches(hue) ||
                 GamePieceColor.RED.matches(hue) ||
                 GamePieceColor.YELLOW.matches(hue);
+    }
+
+    public boolean seeingPiece(Constants.OpModes.AllianceColor color) {
+        float hue = getHue();
+        return GamePieceColor.YELLOW.matches(hue) ||
+                color.gamePieceColor.matches(hue);
+    }
+
+    public boolean seeingAllianceSpecificPiece(Constants.OpModes.AllianceColor color) {
+        float hue = getHue();
+        return color.gamePieceColor.matches(hue);
     }
 }

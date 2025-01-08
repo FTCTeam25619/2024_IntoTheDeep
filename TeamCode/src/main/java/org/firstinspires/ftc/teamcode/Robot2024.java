@@ -87,11 +87,12 @@ public class Robot2024 extends Robot {
 
     public void initOpMode() {
         switch (selectedOpMode) {
-            case DRIVE_STICKS_TELEOP:
+            case DRIVE_STICKS_TELEOP_RED:
+            case DRIVE_STICKS_TELEOP_BLUE:
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
                 // Left and Right Triggers
-                intake.setDefaultCommand(new IntakePiece(intake, controller2, Robot2024.telemetry));
+                intake.setDefaultCommand(new IntakePiece(intake, controller2, selectedOpMode.getAllianceColor(), Robot2024.telemetry));
                 // Y axis on Controller 2 Right Stick
                 climb.setDefaultCommand(new ManualControlClimb(climb, controller2, 0.6));
         }
@@ -240,14 +241,18 @@ public class Robot2024 extends Robot {
     }
 
     Command extendIntake() {
-        return new SequentialCommandGroup(
-                slowDriveModeOn(),
-                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
-                new WaitCommand(10),
-                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
-                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
-                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+        // TODO: Automated intake piece while extending? Test this!
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                        slowDriveModeOn(),
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
+                        new WaitCommand(10),
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+                ),
+                new IntakePiece(intake, controller2, selectedOpMode.getAllianceColor(), Robot2024.telemetry)
         );
     }
 
@@ -346,6 +351,22 @@ public class Robot2024 extends Robot {
 
     Command stopLift() {
         return new InstantCommand(lift::stopMotors);
+    }
+
+    Command intakeWithPieceDetection() {
+        return new IntakePiece(intake, controller2, selectedOpMode.getAllianceColor(), Robot2024.telemetry);
+    }
+
+    Command manualIntake() {
+        return new InstantCommand(intake::intakePiece);
+    }
+
+    Command manualOuttake() {
+        return new InstantCommand(intake::outtakePiece);
+    }
+
+    Command stopIntakeWheels() {
+        return new InstantCommand(intake::stopIntake);
     }
 
     Command resetGyro() {
