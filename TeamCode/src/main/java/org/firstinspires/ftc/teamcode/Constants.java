@@ -13,6 +13,7 @@ public final class Constants {
     }
 
     public static final class HardwareMapping{
+        public static final String imu = "imu";
         public static final String frontLeftWheel = "front_left_wheel";
         public static final String frontRightWheel = "front_right_wheel";
         public static final String backLeftWheel = "back_left_wheel";
@@ -224,6 +225,7 @@ public final class Constants {
         }
         
         public enum OpModeSelection{
+            TEST_AUTO(OpModeType.AUTO),
             DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
 
             private OpModeType opModeType;

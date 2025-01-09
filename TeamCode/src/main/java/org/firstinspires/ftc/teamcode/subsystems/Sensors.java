@@ -53,7 +53,7 @@ public class Sensors extends SubsystemBase {
     private boolean octoQuadReady = false;
 
     public Sensors(HardwareMap hardwareMap, RevHubOrientationOnRobot gyroOrientation, Telemetry telemetry) {
-        this.gyro = new RevIMU(hardwareMap);
+        this.gyro = new RevIMU(hardwareMap, Constants.HardwareMapping.imu);
         this.octoQuad = hardwareMap.get(OctoQuad.class, Constants.HardwareMapping.octoQuad);
         this.odomLeftMotor = new Motor(hardwareMap, Constants.HardwareMapping.leftOdometryPod);
         this.odomRightMotor = new Motor(hardwareMap, Constants.HardwareMapping.rightOdometryPod);
