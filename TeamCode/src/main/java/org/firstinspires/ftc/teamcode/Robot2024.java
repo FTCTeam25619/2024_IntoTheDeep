@@ -109,7 +109,10 @@ public class Robot2024 extends Robot {
             case DRIVE_STICKS_TELEOP:
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
-                setupGamepadButtonMappings();
+        }
+
+        if (selectedOpMode.getOpModeType() == Constants.OpModes.OpModeType.TELEOP) {
+            setupGamepadButtonMappings();
         }
     }
 
