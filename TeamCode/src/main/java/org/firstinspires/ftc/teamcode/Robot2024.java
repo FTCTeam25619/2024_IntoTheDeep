@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.HoldClimb;
 import org.firstinspires.ftc.teamcode.lib.triggers.LeftStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.RightStickY;
+import org.firstinspires.ftc.teamcode.lib.triggers.TriggerAxis;
 import org.firstinspires.ftc.teamcode.lib.triggers.TriggerButton;
 import org.firstinspires.ftc.teamcode.subsystems.Climb;
 import org.firstinspires.ftc.teamcode.subsystems.Depositor;
@@ -33,6 +34,8 @@ import org.firstinspires.ftc.teamcode.subsystems.LEDs;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.subsystems.Sweep;
+
+import java.util.function.DoubleSupplier;
 
 
 /* To connect to the Control Hub device via Wi-Fi:
@@ -138,6 +141,8 @@ public class Robot2024 extends Robot {
         GamepadButton c1Y = new GamepadButton(controller1, GamepadKeys.Button.Y);
         GamepadButton c1LeftBumper = new GamepadButton(controller1, GamepadKeys.Button.LEFT_BUMPER);
         GamepadButton c1RightBumper = new GamepadButton(controller1, GamepadKeys.Button.RIGHT_BUMPER);
+        TriggerAxis c1LeftTrigger = new TriggerAxis(controller1, GamepadKeys.Trigger.LEFT_TRIGGER, ConfigConstants.ManualMovement.slideManualThreshold);
+        TriggerAxis c1RightTrigger = new TriggerAxis(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER, ConfigConstants.ManualMovement.slideManualThreshold);
         GamepadButton c1LeftStickPress = new GamepadButton(controller1, GamepadKeys.Button.LEFT_STICK_BUTTON);
         GamepadButton c1RightStickPress = new GamepadButton(controller1, GamepadKeys.Button.RIGHT_STICK_BUTTON);
         GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
@@ -158,6 +163,9 @@ public class Robot2024 extends Robot {
 
         // Right bumper will release piece and retract scoring mechanism
         c1RightBumper.whenPressed(scoreBasketAndReturnHome());
+
+        c1LeftTrigger.whileActiveContinuous(manualRetractSlide(c1LeftTrigger));
+        c1RightTrigger.whileActiveContinuous(manualExtendSlide(c1RightTrigger));
 
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
@@ -380,6 +388,18 @@ public class Robot2024 extends Robot {
 
     Command stopIntakeWheels() {
         return new InstantCommand(intake::stopIntake);
+    }
+
+    Command manualExtendSlide(DoubleSupplier axisSupplier) {
+        return new InstantCommand(() -> {
+            intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementExtend);
+        });
+    }
+
+    Command manualRetractSlide(DoubleSupplier axisSupplier) {
+        return new InstantCommand(() -> {
+            intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementRetract);
+        });
     }
 
     Command resetGyro() {

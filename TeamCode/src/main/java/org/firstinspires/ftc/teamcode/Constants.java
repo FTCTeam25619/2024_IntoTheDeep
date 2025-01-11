@@ -157,6 +157,12 @@ public final class Constants {
                 this.rightPosition = rightPosition;
             }
         }
+
+        public static double leftSlideRange = Constants.Intake.SlideSetPosition.OUT_NEAR.leftPosition -
+                Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition;
+        public static final double rightSlideRange = Constants.Intake.SlideSetPosition.OUT_NEAR.rightPosition -
+                Constants.Intake.SlideSetPosition.OUT_FAR.rightPosition;
+        public static final double rightToLeftSlideRatio = rightSlideRange / leftSlideRange;
     }
 
     public static final class Depositor {

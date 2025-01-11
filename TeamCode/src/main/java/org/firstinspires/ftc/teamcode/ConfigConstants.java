@@ -34,6 +34,10 @@ public class ConfigConstants {
         public static volatile double liftUpMotorPower = 0.5;
         public static volatile double climbUpMotorPower = -1.0;
         public static volatile double climbDownMotorPower = 1.0;
+        public static volatile double slideManualIncrementExtend = 0.03;
+        public static volatile double slideManualIncrementRetract = -0.03;
+        public static volatile double slideManualDeadband = 0.1;
+        public static volatile double slideManualThreshold = 0.1;
     }
 
     @Config
