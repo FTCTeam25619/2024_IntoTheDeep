@@ -33,6 +33,9 @@ public class Intake extends SubsystemBase{
     private SensorRevTOFDistance distanceSensor;
     private NormalizedColorSensor colorSensor;
 
+    private final Constants.Intake.SlideSetPosition manualMinSetPosition;
+    private final Constants.Intake.SlideSetPosition manualMaxSetPosition;
+
     private Telemetry mTelemetry;
 
     public Intake(HardwareMap hardwareMap, Telemetry telemetry){
@@ -52,6 +55,11 @@ public class Intake extends SubsystemBase{
         if (colorSensor instanceof SwitchableLight) {
             ((SwitchableLight)colorSensor).enableLight(true);
         }
+
+        manualMinSetPosition = Constants.Intake.SlideSetPosition.OUT_NEAR;
+        // Uncomment this line to tune manual slide movement extent
+//        manualMinSetPosition = Constants.Intake.SlideSetPosition.IN;
+        manualMaxSetPosition = Constants.Intake.SlideSetPosition.OUT_FAR;
 
         mTelemetry = telemetry;
     }
@@ -112,8 +120,8 @@ public class Intake extends SubsystemBase{
      */
     public void slideToManualPosition(double leftSlidePosition) {
         double leftTarget = MathUtils.clamp(leftSlidePosition,
-                Constants.Intake.SlideSetPosition.OUT_NEAR.leftPosition,
-                Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition);
+                manualMinSetPosition.leftPosition,
+                manualMaxSetPosition.leftPosition);
         double rightTarget = matchingRightSlidePoint(leftTarget);
         mTelemetry.addData("Intake: slide manual L", leftTarget);
         mTelemetry.addData("Intake: slide manual R:",rightTarget);
@@ -130,8 +138,8 @@ public class Intake extends SubsystemBase{
         mTelemetry.addData("Intake: slide inc", smoothedSpeed);
         double newPosition = currentPosition + smoothedSpeed;
         newPosition = MathUtils.clamp(newPosition,
-                Constants.Intake.SlideSetPosition.OUT_NEAR.leftPosition,
-                Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition);
+                manualMinSetPosition.leftPosition,
+                manualMaxSetPosition.leftPosition);
         mTelemetry.addData("Intake: slide moved", newPosition - currentPosition);
         slideToManualPosition(newPosition);
     }
@@ -145,9 +153,9 @@ public class Intake extends SubsystemBase{
      * @return returns the matching value to use for right slide servo
      */
     private double matchingRightSlidePoint (double leftSlidePoint) {
-        return (leftSlidePoint - Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition) *
+        return (leftSlidePoint - manualMaxSetPosition.leftPosition) *
                 Constants.Intake.rightToLeftSlideRatio +
-                Constants.Intake.SlideSetPosition.OUT_FAR.rightPosition;
+                manualMaxSetPosition.rightPosition;
     }
 
     public void pivotLeftToTestPosition() {
