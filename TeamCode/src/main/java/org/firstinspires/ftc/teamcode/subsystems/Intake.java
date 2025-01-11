@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.SensorRevTOFDistance;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -19,6 +20,8 @@ import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.lib.ContinuousServo;
 import org.firstinspires.ftc.teamcode.lib.GamePieceColor;
+
+import java.util.function.DoubleSupplier;
 
 public class Intake extends SubsystemBase{
     // Discrete Servos
@@ -101,6 +104,52 @@ public class Intake extends SubsystemBase{
         slideRight.setPosition(position.rightPosition);
     }
 
+    /**
+     * Set the intake slide to a particular position.  Input is left servo target position.
+     *
+     * Assumes that the OUT leftPosition is < IN leftPosition.
+     *
+     * @param leftSlidePosition
+     */
+    public void slideToManualPosition(double leftSlidePosition) {
+        double leftTarget = MathUtils.clamp(leftSlidePosition,
+                Constants.Intake.SlideSetPosition.OUT_NEAR.leftPosition,
+                Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition);
+        double rightTarget = matchingRightSlidePoint(leftTarget);
+        mTelemetry.addData("Intake: slide manual L", leftTarget);
+        mTelemetry.addData("Intake: slide manual R:",rightTarget);
+        slideLeft.setPosition(leftTarget);
+        slideRight.setPosition(rightTarget);
+    }
+
+    public void moveSlideManual(DoubleSupplier speedSupplier, double increment) {
+        double speed = speedSupplier.getAsDouble();
+        // Deadband
+        if (speed < ConfigConstants.ManualMovement.slideManualDeadband) { return; }
+        double smoothedSpeed = speed * speed * speed * increment;
+        double currentPosition = slideLeft.getPosition();
+        mTelemetry.addData("Intake: slide inc", smoothedSpeed);
+        double newPosition = currentPosition + smoothedSpeed;
+        newPosition = MathUtils.clamp(newPosition,
+                Constants.Intake.SlideSetPosition.OUT_NEAR.leftPosition,
+                Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition);
+        mTelemetry.addData("Intake: slide moved", newPosition - currentPosition);
+        slideToManualPosition(newPosition);
+    }
+
+    /**
+     *
+     * Uses the OUT_NEAR, OUT_FAR enum constants and assumes linearity in converting slide Left servo
+     * setpoint to the matching right servo setpoint
+     *
+     * @param leftSlidePoint The Left slide servo position
+     * @return returns the matching value to use for right slide servo
+     */
+    private double matchingRightSlidePoint (double leftSlidePoint) {
+        return (leftSlidePoint - Constants.Intake.SlideSetPosition.OUT_FAR.leftPosition) *
+                Constants.Intake.rightToLeftSlideRatio +
+                Constants.Intake.SlideSetPosition.OUT_FAR.rightPosition;
+    }
 
     public void pivotLeftToTestPosition() {
         pivotLeft.setPosition(ConfigConstants.TestPositions.pivotLeftTest);
