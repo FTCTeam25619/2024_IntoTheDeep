@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -15,12 +16,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.commands.AutoIntakePiece;
 import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.HoldClimb;
-import org.firstinspires.ftc.teamcode.commands.IntakePiece;
-import org.firstinspires.ftc.teamcode.commands.ManualControlClimb;
-import org.firstinspires.ftc.teamcode.commands.ManualControlLift;
 import org.firstinspires.ftc.teamcode.lib.triggers.LeftStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.RightStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.TriggerButton;
@@ -101,19 +100,23 @@ public class Robot2024 extends Robot {
     }
 
     public void resetServos() {
+        intake.stopIntake();
         intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
         intake.slideToPosition(Constants.Intake.SlideSetPosition.IN);
         depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
         depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE);
         depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME);
+        sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.HOME);
     }
 
     public void neutralServos() {
+        intake.stopIntake();
         intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
         intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL);
         depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
         depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE);
         depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
+        sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.HOME);
     }
 
     public void setupGamepadButtonMappings() {
@@ -200,12 +203,6 @@ public class Robot2024 extends Robot {
         c2DPadUp.whenPressed(sweepOut());
         c2DPadUp.whenReleased(sweepIn());
 
-        // Enable/Disable Lift manual control: Y axis on Controller 2 Left Stick
-//        c2DPadDown.toggleWhenPressed(
-//                new ManualControlLift(lift, controller2, 0.6),
-//                true
-//        );
-
         // A B X Y move the lift and depositor to scoring positions
         // B and Y do low and high basket positions respectively
         // A and X will do low and high clip bars respectively, when that sequence is created
@@ -262,26 +259,29 @@ public class Robot2024 extends Robot {
     }
 
     Command extendIntake() {
-        return new SequentialCommandGroup(
-                slowDriveModeOn(),
-                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT)),
-                new WaitCommand(10),
-                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
-                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
-                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                        slowDriveModeOn(),
+                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT_NEAR)),
+                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+
+                ),
+                new AutoIntakePiece(intake, Robot2024.telemetry)
         );
     }
 
     Command handoffPiece() {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
-                new WaitCommand(850),
+                new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitBeforeSlideMove),
                 new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
-                new WaitCommand(50),
+                new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitForMateMS),
+                manualIntake(),
                 new AwaitGamePiece(depositor),
-                new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.NEUTRAL)),
-                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL)),
+                stopIntakeWheels(),
                 slowDriveModeOff()
         );
     }
