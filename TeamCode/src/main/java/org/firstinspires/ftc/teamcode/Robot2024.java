@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelRaceGroup;
@@ -97,9 +98,14 @@ public class Robot2024 extends Robot {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
                 // Servos to Home positions
-                resetServos();
+                CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                break;
+            case DISSECTION:
+                // Full extent inspection position
+                CommandScheduler.getInstance().schedule(dissection());
+                break;
         }
         setupGamepadButtonMappings();
     }
@@ -169,10 +175,20 @@ public class Robot2024 extends Robot {
         c1LeftTrigger.whileActiveContinuous(manualRetractSlide(c1LeftTrigger));
         c1RightTrigger.whileActiveContinuous(manualExtendSlide(c1RightTrigger));
 
-        // Dissection mode: full extent for inspection
-        c1Back.whenPressed(dissection());
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
+
+        if (selectedOpMode == OpModeSelection.DISSECTION) {
+            // Dissection mode: full extent for inspection
+            c1A.whenPressed(dissection());
+            c1B.whenPressed(
+                new SequentialCommandGroup(
+                    scoreBasketAndReturnHome(),
+                    new WaitCommand(50),
+                    resetPosition()
+                )
+            );
+        }
     }
 
     private void setupController2ButtonMappings() {
