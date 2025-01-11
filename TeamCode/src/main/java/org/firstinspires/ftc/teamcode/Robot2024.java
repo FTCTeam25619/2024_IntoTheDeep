@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.commands.MoveLiftToHeight;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.LEDs;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.subsystems.Sweep;
@@ -54,6 +55,7 @@ public class Robot2024 extends Robot {
     private final Depositor depositor;
     private final Climb climb;
     private final Sweep sweep;
+    private final LEDs leds;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
@@ -86,6 +88,7 @@ public class Robot2024 extends Robot {
         depositor = new Depositor(hardwareMap, Robot2024.telemetry);
         climb = new Climb(hardwareMap, sensors, Robot2024.telemetry);
         sweep = new Sweep(hardwareMap, Robot2024.telemetry);
+        leds = new LEDs(hardwareMap, sensors, intake, depositor, Robot2024.telemetry);
     }
 
     public void initOpMode() {
