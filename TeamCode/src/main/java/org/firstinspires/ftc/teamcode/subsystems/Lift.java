@@ -104,12 +104,14 @@ public class Lift extends SubsystemBase{
         }
 
         mTelemetry.addData("Lift: Pos cm", getPositionCM());
-        mTelemetry.addData("Lift: Abs Enc V", absoluteEncoder.getVoltage());
-        mTelemetry.addData("Lift: L Enc", mSensors.liftLeftEncoderPosition);
-        mTelemetry.addData("Lift: R Enc", mSensors.liftRightEncoderPosition);
         mTelemetry.addData("Lift: PID Enabled", pidEnabled);
         mTelemetry.addData("Lift: PID target", pidTarget);
-        mTelemetry.addData("Lift: Manual Power", manualPower);
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Lift: Abs Enc V", absoluteEncoder.getVoltage());
+            mTelemetry.addData("Lift: L Enc", mSensors.liftLeftEncoderPosition);
+            mTelemetry.addData("Lift: R Enc", mSensors.liftRightEncoderPosition);
+            mTelemetry.addData("Lift: Manual Power", manualPower);
+        }
     }
 
     public double getPositionCM(){

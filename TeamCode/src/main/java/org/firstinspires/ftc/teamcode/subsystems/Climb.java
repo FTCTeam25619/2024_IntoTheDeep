@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import android.graphics.Bitmap;
-
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -55,12 +52,14 @@ public class Climb extends SubsystemBase {
 
     @Override
     public void periodic() {
-        mTelemetry.addData("Climb: L Enc", mSensors.climbLeftEncoderPosition);
-        mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
-        mTelemetry.addData("Climb: PID Target (L motor)", holdPIDTarget);
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("Climb: PID Targets set", countPIDTargets);
+            mTelemetry.addData("Climb: PID Controller resets", countPIDResets);
+            mTelemetry.addData("Climb: R Enc", mSensors.climbRightEncoderPosition);
+            mTelemetry.addData("Climb: L Enc", mSensors.climbLeftEncoderPosition);
+            mTelemetry.addData("Climb: PID Target (L motor)", holdPIDTarget);
+        }
         mTelemetry.addData("Climb: PID Hold", enabledPID);
-        mTelemetry.addData("Climb: PID Targets set", countPIDTargets);
-        mTelemetry.addData("Climb: PID Controller resets", countPIDResets);
 
         if (enabledPID) {
             // PID hold: recalculate power via PID controllers based on left motor encoder

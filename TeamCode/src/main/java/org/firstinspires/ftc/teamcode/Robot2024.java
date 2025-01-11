@@ -96,6 +96,8 @@ public class Robot2024 extends Robot {
     public void initOpMode() {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
+                // Servos to Home positions
+                resetServos();
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
         }
@@ -259,11 +261,11 @@ public class Robot2024 extends Robot {
     }
 
     Command neutralPosition() {
-        return new InstantCommand(this::neutralServos);
+        return new InstantCommand(this::neutralServos, intake, depositor, sweep);
     }
 
     Command resetPosition() {
-        return new InstantCommand(this::resetServos);
+        return new InstantCommand(this::resetServos, intake, depositor, sweep);
     }
 
     Command extendIntake() {

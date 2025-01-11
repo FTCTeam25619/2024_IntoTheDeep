@@ -34,7 +34,7 @@ public class DriveRobot extends CommandBase {
         double rawX = mController1.getLeftX();
         double rawTurn = mController1.getRightX();
 
-        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Y input raw", rawY);
             mTelemetry.addData("X input raw", rawX);
             mTelemetry.addData("Turn input raw", rawTurn);
@@ -45,7 +45,7 @@ public class DriveRobot extends CommandBase {
         double x = rawY;
         double y = rawX;
         double turn = -rawTurn;
-        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Y input signed", y);
             mTelemetry.addData("X input signed", x);
             mTelemetry.addData("Turn input signed", turn);

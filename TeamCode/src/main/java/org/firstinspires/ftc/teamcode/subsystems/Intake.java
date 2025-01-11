@@ -4,8 +4,6 @@ import android.graphics.Color;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.SensorRevTOFDistance;
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -14,7 +12,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
@@ -61,22 +58,24 @@ public class Intake extends SubsystemBase{
 
     @Override
     public void periodic() {
-        NormalizedRGBA argb = getColor();
-        float[] hsv = new float[3];
-        Color.colorToHSV(argb.toColor(), hsv);
-        float hue = hsv[0];
-        mTelemetry.addData("Intake: L Pivot Pos", pivotLeft.getPosition());
-        mTelemetry.addData("Intake: R Pivot Pos", pivotRight.getPosition());
-        mTelemetry.addData("Intake: L Slide Pos", slideLeft.getPosition());
-        mTelemetry.addData("Intake: R Slide Pos", slideRight.getPosition());
-        mTelemetry.addData("Intake: L Cont Power", intakeLeft.getPower());
-        mTelemetry.addData("Intake: R Cont Power", intakeRight.getPower());
-        mTelemetry.addData("Intake: Color h", "%.3f", hue);
-        mTelemetry.addData("Intake: RED Match", GamePieceColor.RED.matches(hue));
-        mTelemetry.addData("Intake: BLUE Match", GamePieceColor.BLUE.matches(hue));
-        mTelemetry.addData("Intake: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
-        mTelemetry.addData("Intake: BLACK Match", GamePieceColor.BLACK.matches(hue));
-        mTelemetry.addData("Intake: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            NormalizedRGBA argb = getColor();
+            float[] hsv = new float[3];
+            Color.colorToHSV(argb.toColor(), hsv);
+            float hue = hsv[0];
+            mTelemetry.addData("Intake: L Pivot Pos", pivotLeft.getPosition());
+            mTelemetry.addData("Intake: R Pivot Pos", pivotRight.getPosition());
+            mTelemetry.addData("Intake: L Slide Pos", slideLeft.getPosition());
+            mTelemetry.addData("Intake: R Slide Pos", slideRight.getPosition());
+            mTelemetry.addData("Intake: L Cont Power", intakeLeft.getPower());
+            mTelemetry.addData("Intake: R Cont Power", intakeRight.getPower());
+            mTelemetry.addData("Intake: Color h", "%.3f", hue);
+            mTelemetry.addData("Intake: RED Match", GamePieceColor.RED.matches(hue));
+            mTelemetry.addData("Intake: BLUE Match", GamePieceColor.BLUE.matches(hue));
+            mTelemetry.addData("Intake: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
+            mTelemetry.addData("Intake: BLACK Match", GamePieceColor.BLACK.matches(hue));
+            mTelemetry.addData("Intake: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
+        }
     }
 
     public void intakePiece() {

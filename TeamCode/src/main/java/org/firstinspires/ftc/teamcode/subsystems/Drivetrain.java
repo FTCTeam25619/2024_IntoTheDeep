@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Constants.HardwareMapping;
 import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
@@ -61,7 +62,6 @@ public class Drivetrain extends SubsystemBase {
         mTelemetry.addData("RobotState: SLOW MODE", mRobotState.slowDriveMode);
         mTelemetry.addData("RobotState: FIELD CENTRIC", mRobotState.robotDriveMode.fieldCentric);
         mTelemetry.addData("RobotState: FTCLIB DRIVE CODE", mRobotState.robotDriveMode.ftcLibDriveControl);
-
         mTelemetry.addData("Dt: Odom Elapsed ns", SystemClock.elapsedRealtimeNanos() - mSensors.odomTimestampNanos);
         mTelemetry.addData("Dt: Odom Read TS ns", mSensors.odomTimestampNanos);
         mTelemetry.addData("Dt: L Odom Pos m", mSensors.odomLeftDistanceMeters);
