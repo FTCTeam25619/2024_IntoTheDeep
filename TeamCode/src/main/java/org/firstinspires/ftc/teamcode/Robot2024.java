@@ -169,6 +169,8 @@ public class Robot2024 extends Robot {
         c1LeftTrigger.whileActiveContinuous(manualRetractSlide(c1LeftTrigger));
         c1RightTrigger.whileActiveContinuous(manualExtendSlide(c1RightTrigger));
 
+        // Dissection mode: full extent for inspection
+        c1Back.whenPressed(dissection());
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
     }
@@ -268,17 +270,27 @@ public class Robot2024 extends Robot {
         return new InstantCommand(this::resetServos, intake, depositor, sweep);
     }
 
+    Command dissection() {
+        return new SequentialCommandGroup(
+            extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_FAR),
+            new WaitCommand(50),
+            moveLiftAndDepositorToScoringPosition(Constants.ScoringPosition.HIGH_BASKET)
+        );
+    }
+
+    Command extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition slidePosition) {
+        return new SequentialCommandGroup(
+                slowDriveModeOn(),
+                new InstantCommand(() -> intake.slideToPosition(slidePosition)),
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+        );
+    }
     Command extendIntake() {
         return new ParallelCommandGroup(
-                new SequentialCommandGroup(
-                        slowDriveModeOn(),
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT_NEAR)),
-                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
-                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
-                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
-
-                ),
+                extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
                 new AutoIntakePiece(intake, Robot2024.telemetry)
         );
     }
@@ -304,6 +316,23 @@ public class Robot2024 extends Robot {
         return new InstantCommand(() -> sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.HOME));
     }
 
+    Command moveLiftAndDepositorToScoringPosition(Constants.ScoringPosition scoringPosition) {
+        return new ParallelCommandGroup(
+                new MoveLiftToHeight(lift, scoringPosition.liftPosition),
+                new SequentialCommandGroup(
+                        new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
+                        new InstantCommand(() -> {
+                            depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                            depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                        }),
+                        new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
+                        new InstantCommand(() -> {
+                            depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
+                        })
+                )
+        );
+    }
+
     Command moveToScoringPosition(Constants.ScoringPosition scoringPosition) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
@@ -311,20 +340,7 @@ public class Robot2024 extends Robot {
                     depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
                 }),
                 new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForLiftMS),
-                new ParallelCommandGroup(
-                        new MoveLiftToHeight(lift, scoringPosition.liftPosition),
-                        new SequentialCommandGroup(
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
-                                new InstantCommand(() -> {
-                                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
-                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
-                                }),
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
-                                new InstantCommand(() -> {
-                                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
-                                })
-                        )
-                )
+                moveLiftAndDepositorToScoringPosition(scoringPosition)
         );
     }
 
