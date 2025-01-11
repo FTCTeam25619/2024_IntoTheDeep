@@ -50,19 +50,21 @@ public class Depositor extends SubsystemBase {
 
     @Override
     public void periodic() {
-        float hue = getHue();
-        boolean piece = seeingPiece();
-        mTelemetry.addData("Depositor: L Arm Pos", armLeft.getPosition());
-        mTelemetry.addData("Depositor: R Arm Pos", armRight.getPosition());
-        mTelemetry.addData("Depositor: Wrist Pos", wrist.getPosition());
-        mTelemetry.addData("Depositor: Grip Pos", grip.getPosition());
-        mTelemetry.addData("Depositor: Color h", "%.3f", hue);
-        mTelemetry.addData("Depositor: RED Match", GamePieceColor.RED.matches(hue));
-        mTelemetry.addData("Depositor: BLUE Match", GamePieceColor.BLUE.matches(hue));
-        mTelemetry.addData("Depositor: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
-        mTelemetry.addData("Depositor: BLACK Match", GamePieceColor.BLACK.matches(hue));
-        mTelemetry.addData("Depositor: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
-        mTelemetry.addData("Depositor: Piece?", piece);
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            float hue = getHue();
+            boolean piece = seeingPiece();
+            mTelemetry.addData("Depositor: L Arm Pos", armLeft.getPosition());
+            mTelemetry.addData("Depositor: R Arm Pos", armRight.getPosition());
+            mTelemetry.addData("Depositor: Wrist Pos", wrist.getPosition());
+            mTelemetry.addData("Depositor: Grip Pos", grip.getPosition());
+            mTelemetry.addData("Depositor: Color h", "%.3f", hue);
+            mTelemetry.addData("Depositor: RED Match", GamePieceColor.RED.matches(hue));
+            mTelemetry.addData("Depositor: BLUE Match", GamePieceColor.BLUE.matches(hue));
+            mTelemetry.addData("Depositor: YELLOW Match", GamePieceColor.YELLOW.matches(hue));
+            mTelemetry.addData("Depositor: BLACK Match", GamePieceColor.BLACK.matches(hue));
+            mTelemetry.addData("Depositor: Color Sensor Dist (cm)", distanceSensor.getDistance(DistanceUnit.CM));
+            mTelemetry.addData("Depositor: Piece?", piece);
+        }
     }
 
     public void armToPosition(Constants.Depositor.ArmSetPosition position) {

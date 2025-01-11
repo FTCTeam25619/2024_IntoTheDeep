@@ -36,7 +36,7 @@ public class HoldClimb extends CommandBase {
         mClimb.enablePIDHold(true);
         startTimeMS = SystemClock.elapsedRealtime();
         endTimeMS = startTimeMS + holdDurationMS;
-        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Climb/HoldClimb: start (ms)", startTimeMS);
             mTelemetry.addData("Climb/HoldClimb: end (ms)", endTimeMS);
             mTelemetry.addData("Climb/HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());
@@ -46,7 +46,7 @@ public class HoldClimb extends CommandBase {
     @Override
     public void execute() {
         // Nothing more needed
-        if (Constants.RobotModes.DEBUG_TELEMETRY) {
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Climb/HoldClimb: start (ms)", startTimeMS);
             mTelemetry.addData("Climb/HoldClimb: end (ms)", endTimeMS);
             mTelemetry.addData("Climb/HoldClimb: remaining (ms)", endTimeMS - SystemClock.elapsedRealtime());

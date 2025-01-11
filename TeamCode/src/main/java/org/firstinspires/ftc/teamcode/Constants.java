@@ -6,10 +6,7 @@ public final class Constants {
 
     public static final class DebugModes {
         public static final boolean ENABLE_FTC_DASHBOARD = true;
-    }
-
-    public static final class RobotModes {
-        public static final boolean DEBUG_TELEMETRY = true;
+        public static final boolean DEBUG_TELEMETRY = false;
     }
 
     public static final class HardwareMapping{

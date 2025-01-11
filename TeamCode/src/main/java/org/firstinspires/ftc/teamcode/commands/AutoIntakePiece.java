@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.ConfigConstants;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
 public class AutoIntakePiece  extends CommandBase {
@@ -61,12 +62,15 @@ public class AutoIntakePiece  extends CommandBase {
                 mSubsystem.outtakePiece();
                 break;
         }
-        mTelemetry.addData("IntakePiece: State INTAKE", currentState == State.INTAKE);
-        mTelemetry.addData("IntakePiece: State STOPPED", currentState == State.STOPPED);
-        mTelemetry.addData("IntakePiece: State OUTTAKE", currentState == State.OUTTAKE);
-        mTelemetry.addData("IntakePiece: State PIECE_FOUND", currentState == State.PIECE_FOUND);
-        mTelemetry.addData("IntakePiece: count", countAfterPiece);
-        mTelemetry.addData("IntakePiece: done?", false);
+
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            mTelemetry.addData("IntakePiece: State INTAKE", currentState == State.INTAKE);
+            mTelemetry.addData("IntakePiece: State STOPPED", currentState == State.STOPPED);
+            mTelemetry.addData("IntakePiece: State OUTTAKE", currentState == State.OUTTAKE);
+            mTelemetry.addData("IntakePiece: State PIECE_FOUND", currentState == State.PIECE_FOUND);
+            mTelemetry.addData("IntakePiece: count", countAfterPiece);
+            mTelemetry.addData("IntakePiece: done?", false);
+        }
     }
 
     @Override
