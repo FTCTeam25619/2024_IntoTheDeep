@@ -135,4 +135,12 @@ public class Intake extends SubsystemBase{
                 GamePieceColor.RED.matches(hue) ||
                 GamePieceColor.YELLOW.matches(hue);
     }
+
+    public GamePieceColor pieceColorSeen() {
+        float hue = getHue();
+        if (GamePieceColor.BLUE.matches(hue)) return GamePieceColor.BLUE;
+        if (GamePieceColor.RED.matches(hue)) return GamePieceColor.RED;
+        if (GamePieceColor.YELLOW.matches(hue)) return GamePieceColor.YELLOW;
+        return GamePieceColor.BLACK;
+    }
 }

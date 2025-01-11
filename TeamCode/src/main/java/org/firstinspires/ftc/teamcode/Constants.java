@@ -39,6 +39,7 @@ public final class Constants {
         public static final String depositorGripServo = "depositor_grip";
         public static final String depositorColorSensor = "depositor_color";
         public static final String sweepServo = "sweep";
+        public static final String leds = "leds";
     }
 
     public static final class OctoQuad {
