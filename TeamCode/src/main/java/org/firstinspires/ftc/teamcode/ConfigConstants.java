@@ -11,7 +11,7 @@ public class ConfigConstants {
         public static volatile double kD = 0.0;
         public static volatile double kF = 0.0;
         public static volatile double pidTolerance = 500.0;
-        public static volatile int holdTimeoutMS = 20000;
+        public static volatile int holdTimeoutMS = 600000;
         public static volatile double maxHoldMotorPower = 0.1;
         public static volatile int movementBufferCounts = 400;
     }

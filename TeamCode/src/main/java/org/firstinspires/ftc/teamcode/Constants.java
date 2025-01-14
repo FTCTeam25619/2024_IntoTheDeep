@@ -130,8 +130,8 @@ public final class Constants {
         public static enum SlideSetPosition {
             IN(0.15, 0.85),
             NEUTRAL(0.20, 0.80),
-            OUT_NEAR(0.32, 0.68),
-            OUT_FAR(0.54, 0.46);
+            OUT_NEAR(0.275, 0.725),
+            OUT_FAR(0.427, 0.573);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -229,6 +229,7 @@ public final class Constants {
         }
         
         public enum OpModeSelection{
+            DISSECTION(OpModeType.TELEOP),
             DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
 
             private OpModeType opModeType;

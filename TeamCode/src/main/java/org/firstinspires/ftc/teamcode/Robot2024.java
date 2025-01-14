@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelRaceGroup;
@@ -97,9 +98,14 @@ public class Robot2024 extends Robot {
         switch (selectedOpMode) {
             case DRIVE_STICKS_TELEOP:
                 // Servos to Home positions
-                resetServos();
+                CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                break;
+            case DISSECTION:
+                // Full extent inspection position
+                CommandScheduler.getInstance().schedule(dissection());
+                break;
         }
         setupGamepadButtonMappings();
     }
@@ -171,6 +177,18 @@ public class Robot2024 extends Robot {
 
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
+
+        if (selectedOpMode == OpModeSelection.DISSECTION) {
+            // Dissection mode: full extent for inspection
+            c1A.whenPressed(dissection());
+            c1B.whenPressed(
+                new SequentialCommandGroup(
+                    scoreBasketAndReturnHome(),
+                    new WaitCommand(50),
+                    resetPosition()
+                )
+            );
+        }
     }
 
     private void setupController2ButtonMappings() {
@@ -268,17 +286,27 @@ public class Robot2024 extends Robot {
         return new InstantCommand(this::resetServos, intake, depositor, sweep);
     }
 
+    Command dissection() {
+        return new SequentialCommandGroup(
+            extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_FAR),
+            new WaitCommand(50),
+            moveLiftAndDepositorToScoringPosition(Constants.ScoringPosition.HIGH_BASKET)
+        );
+    }
+
+    Command extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition slidePosition) {
+        return new SequentialCommandGroup(
+                slowDriveModeOn(),
+                new InstantCommand(() -> intake.slideToPosition(slidePosition)),
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
+                new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
+                new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
+                new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
+        );
+    }
     Command extendIntake() {
         return new ParallelCommandGroup(
-                new SequentialCommandGroup(
-                        slowDriveModeOn(),
-                        new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.OUT_NEAR)),
-                        new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
-                        new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
-                        new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
-                        new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
-
-                ),
+                extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
                 new AutoIntakePiece(intake, Robot2024.telemetry)
         );
     }
@@ -304,6 +332,23 @@ public class Robot2024 extends Robot {
         return new InstantCommand(() -> sweep.sweepToPosition(Constants.Depositor.SweepSetPosition.HOME));
     }
 
+    Command moveLiftAndDepositorToScoringPosition(Constants.ScoringPosition scoringPosition) {
+        return new ParallelCommandGroup(
+                new MoveLiftToHeight(lift, scoringPosition.liftPosition),
+                new SequentialCommandGroup(
+                        new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
+                        new InstantCommand(() -> {
+                            depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                            depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
+                        }),
+                        new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
+                        new InstantCommand(() -> {
+                            depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
+                        })
+                )
+        );
+    }
+
     Command moveToScoringPosition(Constants.ScoringPosition scoringPosition) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
@@ -311,20 +356,7 @@ public class Robot2024 extends Robot {
                     depositor.armToPosition(Constants.Depositor.ArmSetPosition.NEUTRAL);
                 }),
                 new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForLiftMS),
-                new ParallelCommandGroup(
-                        new MoveLiftToHeight(lift, scoringPosition.liftPosition),
-                        new SequentialCommandGroup(
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForArmMS),
-                                new InstantCommand(() -> {
-                                    depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
-                                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SCORING);
-                                }),
-                                new WaitCommand(ConfigConstants.ScoringTiming.preScoreWaitForWristMS),
-                                new InstantCommand(() -> {
-                                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SCORING);
-                                })
-                        )
-                )
+                moveLiftAndDepositorToScoringPosition(scoringPosition)
         );
     }
 
