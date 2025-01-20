@@ -233,7 +233,9 @@ public class Robot2024 extends Robot {
 
         // A B X Y move the lift and depositor to scoring positions
         // B and Y do low and high basket positions respectively
-        // A and X will do low and high clip bars respectively, when that sequence is created
+        // A and X will do high clip scoring, when that sequence is created
+        c2A.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_CLIP_SCORE));
+        c2X.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_CLIP));
         c2B.whenPressed(moveToScoringPosition(Constants.ScoringPosition.LOW_BASKET));
         c2Y.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_BASKET));
 

@@ -69,6 +69,8 @@ public class ConfigConstants {
         public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
         public static volatile double LIFT_LOW_BASKET = 21.0;
         public static volatile double LIFT_HI_BASKET = 62.0;
+        public static volatile double LIFT_HI_CLIP = 9.65;
+        public static volatile double LIFT_HI_CLIP_SCORE = 1.0;
 
         public static volatile double MAX_UP_POWER = 1.0;
         public static volatile double MAX_UP_POWER_CLOSE = 0.4;
