@@ -213,7 +213,9 @@ public final class Constants {
 
     public static enum ScoringPosition {
         LOW_BASKET(ConfigConstants.Lift.LIFT_LOW_BASKET),
-        HIGH_BASKET(ConfigConstants.Lift.LIFT_HI_BASKET);
+        HIGH_BASKET(ConfigConstants.Lift.LIFT_HI_BASKET),
+        HIGH_CLIP_SCORE(ConfigConstants.Lift.LIFT_HI_CLIP_SCORE),
+        HIGH_CLIP(ConfigConstants.Lift.LIFT_HI_CLIP);
 
         public final double liftPosition;
 
