@@ -38,8 +38,6 @@ public class Depositor extends SubsystemBase {
         }
 
         mTelemetry = telemetry;
-
-        initializePositions();
     }
 
     private void initializePositions() {

@@ -128,10 +128,10 @@ public final class Constants {
 
     public static final class Intake {
         public static enum SlideSetPosition {
-            IN(0.15, 0.85),
-            NEUTRAL(0.20, 0.80),
-            OUT_NEAR(0.275, 0.725),
-            OUT_FAR(0.427, 0.573);
+            IN(0.06, 0.94),
+            NEUTRAL(0.1, 0.90),
+            OUT_NEAR(0.25, 0.75),
+            OUT_FAR(0.4, 0.555);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -143,8 +143,8 @@ public final class Constants {
         }
 
         public static enum PivotSetPosition {
-            UP(0.985, 0.01),
-            DOWN(0.0, 1.0);
+            UP(0.87, 0.12),
+            DOWN(0.01, 0.985);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -164,9 +164,11 @@ public final class Constants {
 
     public static final class Depositor {
         public static enum ArmSetPosition {
-            HOME(0.0, 0.985),
-            NEUTRAL(0.02, 0.945),
-            SCORING(0.8, 0.175);
+            HOME(0.09, 0.91),
+            NEUTRAL(0.09, 0.91),
+            SCORING(0.62, 0.38),
+            SPECIMENSCORING (0.33, 0.67),
+            SPECIMENINTAKE (1.0,0.0);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -178,8 +180,10 @@ public final class Constants {
         }
 
         public static enum WristSetPosition {
-            INTAKE(0.215),
-            SCORING(0.715);
+            INTAKE(0.0),
+            SCORING(0.4),
+            SPECIMEN (1.0);
+
 
             public final double position;
 
@@ -190,7 +194,7 @@ public final class Constants {
 
         public static enum GripSetPosition {
             OPEN(0.2),
-            CLOSED(0.7);
+            CLOSED(0.55);
 
             public final double position;
 
@@ -230,6 +234,7 @@ public final class Constants {
         
         public enum OpModeSelection{
             DISSECTION(OpModeType.TELEOP),
+            SERVO_TUNING(OpModeType.TELEOP),
             DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
 
             private OpModeType opModeType;

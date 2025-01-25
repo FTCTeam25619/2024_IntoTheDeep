@@ -67,8 +67,8 @@ public class ConfigConstants {
         public static volatile double MAX_POS_CM = 70.0;
 
         public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
-        public static volatile double LIFT_LOW_BASKET = 21.0;
-        public static volatile double LIFT_HI_BASKET = 62.0;
+        public static volatile double LIFT_LOW_BASKET = 6.7;
+        public static volatile double LIFT_HI_BASKET = 45.3;
 
         public static volatile double MAX_UP_POWER = 1.0;
         public static volatile double MAX_UP_POWER_CLOSE = 0.4;
@@ -108,14 +108,14 @@ public class ConfigConstants {
 
     @Config
     public static class TestPositions {
-        public static volatile double slideLeftTest = 0.23;
-        public static volatile double slideRightTest = 0.015;
-        public static volatile double pivotLeftTest = 0.985;
-        public static volatile double pivotRightTest = 0.01;
-        public static volatile double wristTest = 0.215;
-        public static volatile double gripTest = 0.2;
-        public static volatile double armLeftTest = 0.8;
-        public static volatile double armRightTest = 0.175;
+        public static volatile double slideLeftTest = 0.055;
+        public static volatile double slideRightTest = 0.945;
+        public static volatile double pivotLeftTest = 0.875;
+        public static volatile double pivotRightTest = 0.125;
+        public static volatile double wristTest = 0.0;
+        public static volatile double gripTest = 0.5;
+        public static volatile double armLeftTest = 0.12;
+        public static volatile double armRightTest = 0.88;
         public static volatile double sweepTest = 0.0;
     }
 }
