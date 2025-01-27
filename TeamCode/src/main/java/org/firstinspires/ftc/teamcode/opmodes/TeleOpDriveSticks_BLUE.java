@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -11,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.Robot2024;
 
 @TeleOp
-public class TeleOpDriveSticks  extends OpMode {
+public class TeleOpDriveSticks_BLUE extends OpMode {
     private Robot2024 robot;
 
     @Override

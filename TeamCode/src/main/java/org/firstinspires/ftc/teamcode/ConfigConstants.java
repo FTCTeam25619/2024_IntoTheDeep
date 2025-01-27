@@ -10,10 +10,14 @@ public class ConfigConstants {
         public static volatile double kI = 0.0;
         public static volatile double kD = 0.0;
         public static volatile double kF = 0.0;
+        public static volatile double SYNC_KP = 0.0001;
+        public static volatile double SYNC_KI = 0.0;
+        public static volatile double SYNC_KD = 0.0;
         public static volatile double pidTolerance = 500.0;
         public static volatile int holdTimeoutMS = 600000;
         public static volatile double maxHoldMotorPower = 0.1;
         public static volatile int movementBufferCounts = 400;
+
     }
 
     @Config
@@ -45,8 +49,10 @@ public class ConfigConstants {
         public static volatile int cycleWaitAfterPiece = 10;
         public static volatile int cyclesReverse = -1;
         public static volatile double spinSpeedFactor = 1.0;
+        public static volatile int extendWaitForPivotingMS = 100;
         public static volatile int handoffWaitForMateMS = 300;
-        public static volatile int handoffWaitBeforeSlideMove = 1200;
+        public static volatile int handoffWaitBeforeSlideMove = 620;
+        public static volatile double handoffSpeedFactor = 1.0;
     }
 
     @Config
@@ -69,8 +75,8 @@ public class ConfigConstants {
         public static volatile double LIFT_DOWN_POS = MIN_POS_CM + 0.5;  //Add small tolerance to avoid hard limit
         public static volatile double LIFT_LOW_BASKET = 21.0;
         public static volatile double LIFT_HI_BASKET = 62.0;
-        public static volatile double LIFT_HI_CLIP = 9.65;
-        public static volatile double LIFT_HI_CLIP_SCORE = 1.0;
+        public static volatile double LIFT_SPECIMEN_HIGH = 6.7;
+        public static volatile double LIFT_SPECIMEN_SCORE = 6.7;
 
         public static volatile double MAX_UP_POWER = 1.0;
         public static volatile double MAX_UP_POWER_CLOSE = 0.4;
@@ -106,6 +112,8 @@ public class ConfigConstants {
 
         public static volatile double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
         public static volatile double SLOW_DRIVE_MODE_TURN_FACTOR = 4.0;
+
+        public static volatile double kP_ORIENTATION = 0.01;
     }
 
     @Config

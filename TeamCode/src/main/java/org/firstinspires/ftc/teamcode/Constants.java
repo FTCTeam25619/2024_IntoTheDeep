@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
+import org.firstinspires.ftc.teamcode.lib.GamePieceColor;
+
+
 public final class Constants {
 
     public static final class DebugModes {
@@ -166,7 +169,10 @@ public final class Constants {
         public static enum ArmSetPosition {
             HOME(0.0, 0.985),
             NEUTRAL(0.02, 0.945),
-            SCORING(0.8, 0.175);
+            SCORING(0.8, 0.175),
+            SPECIMENSCORE (0.45, 0.55),
+            SPECIMENGRAB (0.0,1.0);            ;
+
 
             public final double leftPosition;
             public final double rightPosition;
@@ -179,7 +185,10 @@ public final class Constants {
 
         public static enum WristSetPosition {
             INTAKE(0.215),
-            SCORING(0.715);
+            SCORING(0.715),
+            SPECIMENGRAB(1.0),
+            SPECIMENSCORE(.45);
+
 
             public final double position;
 
@@ -213,9 +222,7 @@ public final class Constants {
 
     public static enum ScoringPosition {
         LOW_BASKET(ConfigConstants.Lift.LIFT_LOW_BASKET),
-        HIGH_BASKET(ConfigConstants.Lift.LIFT_HI_BASKET),
-        HIGH_CLIP_SCORE(ConfigConstants.Lift.LIFT_HI_CLIP_SCORE),
-        HIGH_CLIP(ConfigConstants.Lift.LIFT_HI_CLIP);
+        HIGH_BASKET(ConfigConstants.Lift.LIFT_HI_BASKET);
 
         public final double liftPosition;
 
@@ -229,20 +236,38 @@ public final class Constants {
             TELEOP,
             AUTO;
         }
-        
+
+        public enum AllianceColor {
+            RED(GamePieceColor.RED),
+            BLUE(GamePieceColor.BLUE),
+            YELLOW(GamePieceColor.YELLOW);
+
+
+            public final GamePieceColor gamePieceColor;
+
+            private AllianceColor(GamePieceColor gamepieceColor) {
+                this.gamePieceColor = gamepieceColor;
+            }
+        }
+
+
         public enum OpModeSelection{
-            DISSECTION(OpModeType.TELEOP),
-            DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
+            DRIVE_STICKS_TELEOP_RED(OpModeType.TELEOP, AllianceColor.RED),
+            DRIVE_STICKS_TELEOP_BLUE(OpModeType.TELEOP, AllianceColor.BLUE),
+            DISSECTION(OpModeType.TELEOP, AllianceColor.BLUE);
 
             private OpModeType opModeType;
+            private AllianceColor allianceColor;
 
-            private OpModeSelection(OpModeType opmodeTypeSetting){
+            private OpModeSelection(OpModeType opmodeTypeSetting, AllianceColor color){
                 opModeType = opmodeTypeSetting;
+                allianceColor = color;
             }
 
             public OpModeType getOpModeType(){
                 return opModeType;
             }
+            public AllianceColor getAllianceColor() { return allianceColor; }
         }
     }
 }

@@ -3,33 +3,35 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.ConfigConstants;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-public class AutoIntakePiece  extends CommandBase {
+public class AutoIntakePiece extends CommandBase {
     private final Intake mSubsystem;
     private final Telemetry mTelemetry;
+    private final Constants.OpModes.AllianceColor allianceColor;
 
     private int countAfterPiece;
+    private State currentState;
+    private final TransferPiece transferPiece;
 
     private enum State {
         STOPPED,
         INTAKE,
         PIECE_FOUND,
-        OUTTAKE;
+        OUTTAKE,
+        EJECTING
     }
 
-    private State currentState;
-
-    public AutoIntakePiece(Intake subsystem, Telemetry telemetry) {
+    public AutoIntakePiece(Intake subsystem, Telemetry telemetry, Constants.OpModes.AllianceColor color, TransferPiece transferPiece) {
         this.mSubsystem = subsystem;
         this.mTelemetry = telemetry;
-
+        this.allianceColor = color;
+        this.transferPiece = transferPiece; // Store reference to TransferPiece
         countAfterPiece = 0;
         currentState = State.INTAKE;
 
-        addRequirements(subsystem);
+        addRequirements(subsystem); // Ensure proper dependency management
     }
 
     @Override
@@ -44,22 +46,41 @@ public class AutoIntakePiece  extends CommandBase {
             case STOPPED:
                 countAfterPiece = 0;
                 mSubsystem.stopIntake();
+                // Schedule TransferPiece after STOPPED state
+                transferPiece.schedule();
                 break;
+
             case INTAKE:
                 mSubsystem.intakePiece();
                 countAfterPiece = 0;
-                if (mSubsystem.seeingPiece()) { currentState = State.PIECE_FOUND; }
-                break;
-            case PIECE_FOUND:
-                countAfterPiece++;
-                if (countAfterPiece <= ConfigConstants.IntakeTiming.cyclesReverse) {
-                    mSubsystem.outtakePiece();
-                } else {
-                    currentState = State.STOPPED;
+                if (mSubsystem.seeingPiece()) {
+                    currentState = State.PIECE_FOUND;
                 }
                 break;
+
+            case PIECE_FOUND:
+                if (mSubsystem.seeingAllianceSpecificPiece(allianceColor) ||
+                        mSubsystem.seeingAllianceSpecificPiece(Constants.OpModes.AllianceColor.YELLOW)) {
+                    currentState = State.STOPPED;
+                } else {
+                    countAfterPiece = 0;
+                    currentState = State.EJECTING;
+                }
+                if (!mSubsystem.seeingPiece()) {
+                    currentState = State.INTAKE;
+                }
+                break;
+
             case OUTTAKE:
                 mSubsystem.outtakePiece();
+                break;
+
+            case EJECTING:
+                mSubsystem.outtakePiece();
+                countAfterPiece++;
+                if (countAfterPiece > 250) {
+                    currentState = State.INTAKE;
+                }
                 break;
         }
 

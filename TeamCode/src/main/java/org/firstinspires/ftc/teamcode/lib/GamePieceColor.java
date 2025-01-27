@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.lib;
 
 import org.firstinspires.ftc.teamcode.ConfigConstants;
-import org.firstinspires.ftc.teamcode.Constants;
 
 public enum GamePieceColor {
     BLUE(ConfigConstants.Colors.BLUE_HUE_MIN, ConfigConstants.Colors.BLUE_HUE_MAX),
