@@ -43,6 +43,14 @@ public class ContinuousServo {
         servo.setPower(ContinuousServoDirection.REVERSE.power * ConfigConstants.IntakeTiming.spinSpeedFactor);
     }
 
+    public void reversePower(double spinSpeedFactor){
+        servo.setPower(ContinuousServoDirection.REVERSE.power * spinSpeedFactor);
+    }
+
+    public void forwardPower(double spinSpeedFactor){
+        servo.setPower(ContinuousServoDirection.REVERSE.power * spinSpeedFactor);
+    }
+
     public void setInverted(boolean isInverted) {
         servo.setDirection(isInverted ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
     }

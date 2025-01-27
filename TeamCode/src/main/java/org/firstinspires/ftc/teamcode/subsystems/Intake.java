@@ -96,6 +96,15 @@ public class Intake extends SubsystemBase{
         intakeRight.forward();
     }
 
+    public void intakePiecePower(double spinFeedFactor){
+        intakeLeft.reversePower(spinFeedFactor);
+        intakeRight.reversePower(spinFeedFactor);
+    }
+
+    public void outtakePiecePower(double spinFeedFactor){
+        intakeLeft.forwardPower(spinFeedFactor);
+        intakeRight.forwardPower(spinFeedFactor);
+    }
     public void stopIntake() {
         intakeLeft.stop();
         intakeRight.stop();
@@ -198,5 +207,10 @@ public class Intake extends SubsystemBase{
         if (GamePieceColor.RED.matches(hue)) return GamePieceColor.RED;
         if (GamePieceColor.YELLOW.matches(hue)) return GamePieceColor.YELLOW;
         return GamePieceColor.BLACK;
+    }
+
+    public boolean seeingAllianceSpecificPiece(Constants.OpModes.AllianceColor color) {
+        float hue = getHue();
+        return color.gamePieceColor.matches(hue);
     }
 }

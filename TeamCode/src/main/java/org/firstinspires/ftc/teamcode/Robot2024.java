@@ -4,7 +4,6 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -21,6 +20,8 @@ import org.firstinspires.ftc.teamcode.commands.AutoIntakePiece;
 import org.firstinspires.ftc.teamcode.commands.AwaitGamePiece;
 import org.firstinspires.ftc.teamcode.commands.DriveRobot;
 import org.firstinspires.ftc.teamcode.commands.HoldClimb;
+import org.firstinspires.ftc.teamcode.commands.TransferPiece;
+import org.firstinspires.ftc.teamcode.lib.RevIMU;
 import org.firstinspires.ftc.teamcode.lib.triggers.LeftStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.RightStickY;
 import org.firstinspires.ftc.teamcode.lib.triggers.TriggerAxis;
@@ -59,14 +60,20 @@ public class Robot2024 extends Robot {
     private final Climb climb;
     private final Sweep sweep;
     private final LEDs leds;
+    private RevIMU revIMU;
     private final RevHubOrientationOnRobot gyroOrientation;
     public static Telemetry telemetry;
 
     private final OpModeSelection selectedOpMode;
+    private Constants.OpModes.AllianceColor allianceColor;
+
+    TransferPiece transferPiece;
 
     public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, OpModeSelection opModeSelection) {
         // OpMode selection
         selectedOpMode = opModeSelection;
+        Constants.OpModes.AllianceColor allianceColor = selectedOpMode.getAllianceColor();
+
 
         // Telemetry
         Robot2024.telemetry = telemetry;
@@ -96,11 +103,12 @@ public class Robot2024 extends Robot {
 
     public void initOpMode() {
         switch (selectedOpMode) {
-            case DRIVE_STICKS_TELEOP:
+            case DRIVE_STICKS_TELEOP_RED:
+            case DRIVE_STICKS_TELEOP_BLUE:
                 // Servos to Home positions
                 CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
-                drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry, sensors));
                 break;
             case DISSECTION:
                 // Full extent inspection position
@@ -175,6 +183,8 @@ public class Robot2024 extends Robot {
         c1LeftTrigger.whileActiveContinuous(manualRetractSlide(c1LeftTrigger));
         c1RightTrigger.whileActiveContinuous(manualExtendSlide(c1RightTrigger));
 
+
+
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
 
@@ -213,6 +223,9 @@ public class Robot2024 extends Robot {
         GamepadButton c2RightStickPress = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
         GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
         GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
+        GamepadButton c1DPadRight = new GamepadButton(controller1, GamepadKeys.Button.DPAD_RIGHT);
 
         // Map controller 2 buttons to commands
         // Left stick is mapped to Manual Lift movement up and down
@@ -233,14 +246,28 @@ public class Robot2024 extends Robot {
 
         // A B X Y move the lift and depositor to scoring positions
         // B and Y do low and high basket positions respectively
-        // A and X will do high clip scoring, when that sequence is created
-        c2A.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_CLIP_SCORE));
-        c2X.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_CLIP));
+        // A and X will do low and high clip bars respectively, when that sequence is created
         c2B.whenPressed(moveToScoringPosition(Constants.ScoringPosition.LOW_BASKET));
         c2Y.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_BASKET));
 
-        c2LeftBumper.whenPressed(handoffPiece());
-        c2RightBumper.whenPressed(extendIntake());
+        //Extend and retract intake slide
+        c2LeftBumper.whenPressed(() -> {
+            // Cancel extendIntake if running
+            if (CommandScheduler.getInstance().isScheduled(extendIntake())) {
+                CommandScheduler.getInstance().cancel(extendIntake());
+            }
+            // Schedule handoffPiece
+            CommandScheduler.getInstance().schedule(handoffPiece());
+        });
+
+        c2RightBumper.whenPressed(() -> {
+            // Cancel extendIntake if running
+            if (CommandScheduler.getInstance().isScheduled(handoffPiece())) {
+                CommandScheduler.getInstance().cancel(handoffPiece());
+            }
+            // Schedule handoffPiece
+            CommandScheduler.getInstance().schedule(extendIntake());
+        });
 
         c2LeftTrigger.whileActiveContinuous(manualOuttake());
         c2LeftTrigger.whenInactive(stopIntakeWheels());
@@ -250,6 +277,12 @@ public class Robot2024 extends Robot {
 
         c2Back.whenPressed(neutralPosition());
         c2Start.whenPressed(resetPosition());
+
+        //Specimen grab & score sequence test buttons
+        c1Back.whenPressed(depositorToSpecimenGrabPosition());
+        c1Start.whenPressed(depositorToSpecimenScorePosition());
+        c1DPadRight.whenPressed(depositorScoreSpecimen());
+
     }
 
     private void setupTestingButtonMappings() {
@@ -296,10 +329,58 @@ public class Robot2024 extends Robot {
         );
     }
 
+    Command depositorToSpecimenGrabPosition() {
+        return new ParallelCommandGroup(
+                new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_DOWN_POS),
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> {
+                            depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+                            depositor.armToPosition(Constants.Depositor.ArmSetPosition.SPECIMENGRAB);
+                        }),
+                        new WaitCommand(50),
+                        new InstantCommand(() -> {
+                            depositor.wristToPosition(Constants.Depositor.WristSetPosition.SPECIMENGRAB);
+                        })
+                )
+        );
+    }
+
+    Command depositorToSpecimenScorePosition() {
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> {
+                            depositor.gripToPosition(Constants.Depositor.GripSetPosition.CLOSED);
+                        }),
+                        new WaitCommand(100),
+                        new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_SPECIMEN_HIGH),
+                        new WaitCommand(150),
+                        new InstantCommand(() -> {
+                            depositor.armToPosition(Constants.Depositor.ArmSetPosition.SPECIMENSCORE);
+                            depositor.wristToPosition(Constants.Depositor.WristSetPosition.SPECIMENSCORE);
+                        })
+                )
+        );
+    }
+
+    Command depositorScoreSpecimen() {
+        return new SequentialCommandGroup(
+                new MoveLiftToHeight(lift, ConfigConstants.Lift.LIFT_SPECIMEN_SCORE),
+                new WaitCommand(250),
+                new InstantCommand(() -> {
+                    //depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN);
+                    depositor.armToPosition(Constants.Depositor.ArmSetPosition.SPECIMENGRAB);
+                }),
+                new WaitCommand(50),
+                new InstantCommand(() -> {
+                    depositor.wristToPosition(Constants.Depositor.WristSetPosition.SPECIMENGRAB);
+                })
+        );
+    }
     Command extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition slidePosition) {
         return new SequentialCommandGroup(
                 slowDriveModeOn(),
                 new InstantCommand(() -> intake.slideToPosition(slidePosition)),
+                new WaitCommand(ConfigConstants.IntakeTiming.extendWaitForPivotingMS),
                 new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
                 new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
                 new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
@@ -309,20 +390,20 @@ public class Robot2024 extends Robot {
     Command extendIntake() {
         return new ParallelCommandGroup(
                 extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
-                new AutoIntakePiece(intake, Robot2024.telemetry)
+                new AutoIntakePiece(intake, Robot2024.telemetry, allianceColor, transferPiece)
         );
     }
 
     Command handoffPiece() {
         return new SequentialCommandGroup(
+                slowDriveModeOff(),
                 new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitBeforeSlideMove),
                 new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitForMateMS),
-                manualIntake(),
+                manualOuttakePower(ConfigConstants.IntakeTiming.handoffSpeedFactor),
                 new AwaitGamePiece(depositor),
-                stopIntakeWheels(),
-                slowDriveModeOff()
+                stopIntakeWheels()
         );
     }
 
@@ -386,15 +467,15 @@ public class Robot2024 extends Robot {
 
     Command moveClimbHooksUp() {
         return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(1.0);
         }, climb);
     }
 
     Command moveClimbHooksDown() {
         return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(-1.0);
         }, climb);
     }
 
@@ -418,8 +499,16 @@ public class Robot2024 extends Robot {
         return new InstantCommand(intake::intakePiece);
     }
 
+    Command manualIntakePower(double spinFeedFactor) {
+        return new InstantCommand(() -> intake.intakePiecePower(spinFeedFactor));
+    }
+
     Command manualOuttake() {
         return new InstantCommand(intake::outtakePiece);
+    }
+
+    Command manualOuttakePower(double spinFeedFactor) {
+        return new InstantCommand(() -> intake.outtakePiecePower(spinFeedFactor));
     }
 
     Command stopIntakeWheels() {
@@ -427,18 +516,35 @@ public class Robot2024 extends Robot {
     }
 
     Command manualExtendSlide(DoubleSupplier axisSupplier) {
+        if (isIntakeIdle()) {
+            return new InstantCommand(() ->
+                    intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementExtend)
+            );
+        }
         return new InstantCommand(() -> {
-            intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementExtend);
+            // Do nothing or handle the non-idle case as needed
         });
     }
 
     Command manualRetractSlide(DoubleSupplier axisSupplier) {
+        if (isIntakeIdle()) {
+            return new InstantCommand(() ->
+                    intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementRetract)
+            );
+        }
         return new InstantCommand(() -> {
-            intake.moveSlideManual(axisSupplier, ConfigConstants.ManualMovement.slideManualIncrementRetract);
+            // Do nothing or handle the non-idle case as needed
         });
     }
 
     Command resetGyro() {
         return new InstantCommand(sensors::resetGyro);
     }
+
+    private boolean isIntakeIdle() {
+        // Check if extendIntake is NOT scheduled AND handoffPiece is NOT scheduled
+        return !CommandScheduler.getInstance().isScheduled(extendIntake()) &&
+                !CommandScheduler.getInstance().isScheduled(handoffPiece());
+    }
+
 }

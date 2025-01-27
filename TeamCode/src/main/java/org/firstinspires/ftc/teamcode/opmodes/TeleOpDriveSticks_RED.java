@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Constants.OpModes.OpModeSelection;
 import org.firstinspires.ftc.teamcode.Robot2024;
 
 @TeleOp
-public class TeleOpDriveSticks  extends OpMode {
+public class TeleOpDriveSticks_RED extends OpMode {
     private Robot2024 robot;
 
     @Override
@@ -22,7 +22,7 @@ public class TeleOpDriveSticks  extends OpMode {
             telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         }
 
-        robot = new Robot2024(hardwareMap, gamepad1, gamepad2, telemetry, OpModeSelection.DRIVE_STICKS_TELEOP_BLUE);
+        robot = new Robot2024(hardwareMap, gamepad1, gamepad2, telemetry, OpModeSelection.DRIVE_STICKS_TELEOP_RED);
 
         telemetry.addData("Robot Status", "Initializing TeleOpDriveSticks");
     }
