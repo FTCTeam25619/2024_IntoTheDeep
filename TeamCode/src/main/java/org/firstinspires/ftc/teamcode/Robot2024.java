@@ -345,6 +345,7 @@ public class Robot2024 extends Robot {
         return new SequentialCommandGroup(
                 slowDriveModeOn(),
                 new InstantCommand(() -> intake.slideToPosition(slidePosition)),
+                new WaitCommand(ConfigConstants.IntakeTiming.extendWaitBeforePivotMove),
                 new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
                 new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
                 new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
