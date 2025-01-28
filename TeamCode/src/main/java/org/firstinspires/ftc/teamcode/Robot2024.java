@@ -101,13 +101,17 @@ public class Robot2024 extends Robot {
                 CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
+                setupGamepadButtonMappings();
+                break;
+            case SERVO_TUNING:
+                setupTuningButtonMappings();
                 break;
             case DISSECTION:
                 // Full extent inspection position
                 CommandScheduler.getInstance().schedule(dissection());
+                setupGamepadButtonMappings();
                 break;
         }
-        setupGamepadButtonMappings();
     }
 
     public void resetServos() {
@@ -133,8 +137,6 @@ public class Robot2024 extends Robot {
     public void setupGamepadButtonMappings() {
         setupController1ButtonMappings();
         setupController2ButtonMappings();
-
-//        setupTestingButtonMappings();
     }
 
     private void setupController1ButtonMappings() {
@@ -213,6 +215,8 @@ public class Robot2024 extends Robot {
         GamepadButton c2RightStickPress = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
         GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
         GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
 
         // Map controller 2 buttons to commands
         // Left stick is mapped to Manual Lift movement up and down
@@ -250,24 +254,67 @@ public class Robot2024 extends Robot {
         c2Start.whenPressed(resetPosition());
     }
 
-    private void setupTestingButtonMappings() {
-        // Test positions for tuning
+    private void setupTuningButtonMappings() {
         GamepadButton c1A = new GamepadButton(controller1, GamepadKeys.Button.A);
         GamepadButton c1B = new GamepadButton(controller1, GamepadKeys.Button.B);
+        GamepadButton c1X = new GamepadButton(controller1, GamepadKeys.Button.X);
+        GamepadButton c1Y = new GamepadButton(controller1, GamepadKeys.Button.Y);
+        GamepadButton c1LeftBumper = new GamepadButton(controller1, GamepadKeys.Button.LEFT_BUMPER);
+        GamepadButton c1RightBumper = new GamepadButton(controller1, GamepadKeys.Button.RIGHT_BUMPER);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
+        LeftStickY c2LeftStickYUp = new LeftStickY(controller2, 0.6);
+        LeftStickY c2LeftStickYDown = new LeftStickY(controller2, -0.6);
+        RightStickY c2RightStickYUp = new RightStickY(controller2, 0.6);
+        RightStickY c2RightStickYDown = new RightStickY(controller2, -0.6);
+        GamepadButton c2A = new GamepadButton(controller2, GamepadKeys.Button.A);
+        GamepadButton c2B = new GamepadButton(controller2, GamepadKeys.Button.B);
+        GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
+        GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
+        GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
+        GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
+        GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+        // Test positions for tuning
         // Pivot position tuning
-//        c1A.whenPressed(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
-//        c1B.whenPressed(new InstantCommand(() -> intake.pivotRightToTestPosition()));
+        c1A.whenPressed(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
+        c1B.whenPressed(new InstantCommand(() -> intake.pivotRightToTestPosition()));
         // Slide position tuning
-//        c1A.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
-//        c1B.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
+        c1X.whenPressed(new InstantCommand(() -> intake.slideLeftToTestPosition()));
+        c1Y.whenPressed(new InstantCommand(() -> intake.slideRightToTestPosition()));
+        // Continuous Wheel servos tuning
+        c1LeftBumper.whileHeld(new InstantCommand(() -> intake.intakePiece()));
+        c1LeftBumper.whenReleased(new InstantCommand(() -> intake.stopIntake()));
+        c1RightBumper.whileHeld(new InstantCommand(() -> intake.outtakePiece()));
+        c1RightBumper.whenReleased(new InstantCommand(() -> intake.stopIntake()));
         // Arm position tuning
-//        c1A.whenPressed(new InstantCommand(() -> depositor.armLeftToTestPosition()));
-//        c1B.whenPressed(new InstantCommand(() -> depositor.armRightToTestPosition()));
+        c2A.whenPressed(new InstantCommand(() -> depositor.armLeftToTestPosition()));
+        c2B.whenPressed(new InstantCommand(() -> depositor.armRightToTestPosition()));
         // Grip & Wrist position tuning
-//        c1A.whenPressed(new InstantCommand(() -> depositor.gripToTestPosition()));
-//        c1B.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
+        c2X.whenPressed(new InstantCommand(() -> depositor.gripToTestPosition()));
+        c2Y.whenPressed(new InstantCommand(() -> depositor.wristToTestPosition()));
         // Sweep position tuning
-//        c1A.whenPressed(new InstantCommand(() -> sweep.sweepToTestPosition()));
+        c2LeftBumper.whenPressed(new InstantCommand(() -> sweep.sweepToTestPosition()));
+        // Left stick is mapped to Manual Lift movement up and down
+        c2LeftStickYUp.whileActiveContinuous(moveLiftUp());
+        c2LeftStickYUp.whenInactive(stopLift());
+        c2LeftStickYDown.whileActiveContinuous(moveLiftDown());
+        c2LeftStickYDown.whenInactive(stopLift());
+        // Right stick is mapped to Manual Climb hooks movement up and down
+        c2RightStickYUp.whileActiveContinuous(moveClimbHooksUp());
+        c2RightStickYUp.whenInactive(holdClimb());
+        c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
+        c2RightStickYDown.whenInactive(holdClimb());
+
+        //Manual individual control of climb arms
+        c1Start.whileActiveContinuous(moveLeftClimbUp());
+        c1Start.whenReleased(climbStop());
+        c1Back.whileActiveContinuous(moveLeftClimbDown());
+        c1Back.whenReleased(climbStop());
+
+        c2Start.whileActiveContinuous(moveRightClimbDown());
+        c2Start.whenReleased(climbStop());
+        c2Back.whileActiveContinuous(moveRightClimbUp());
+        c2Back.whenReleased(climbStop());
     }
 
     Command slowDriveModeOn() {
@@ -298,6 +345,7 @@ public class Robot2024 extends Robot {
         return new SequentialCommandGroup(
                 slowDriveModeOn(),
                 new InstantCommand(() -> intake.slideToPosition(slidePosition)),
+                new WaitCommand(ConfigConstants.IntakeTiming.extendWaitBeforePivotMove),
                 new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN)),
                 new InstantCommand(() -> depositor.gripToPosition(Constants.Depositor.GripSetPosition.OPEN)),
                 new InstantCommand(() -> depositor.armToPosition(Constants.Depositor.ArmSetPosition.HOME)),
@@ -307,20 +355,23 @@ public class Robot2024 extends Robot {
     Command extendIntake() {
         return new ParallelCommandGroup(
                 extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
+                // Requires intake subsystem
                 new AutoIntakePiece(intake, Robot2024.telemetry)
         );
     }
 
     Command handoffPiece() {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
+                // Intentionally require intake subsystem to ensure we can cancel AutoIntakePiece when needed
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP), intake),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitBeforeSlideMove),
                 new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitForMateMS),
-                manualIntake(),
+                slowDriveModeOff(),
+                manualOuttake(),
+                // TODO: Does not require depositor subsystem; do we need to?
                 new AwaitGamePiece(depositor),
-                stopIntakeWheels(),
-                slowDriveModeOff()
+                stopIntakeWheels()
         );
     }
 
@@ -396,8 +447,41 @@ public class Robot2024 extends Robot {
         }, climb);
     }
 
+    Command moveLeftClimbUp() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerLeft(-1.0);
+        }, climb);
+    }
+    Command moveLeftClimbDown() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerLeft(1.0);
+        }, climb);
+    }
+
+    Command moveRightClimbUp() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerRight(1.0);
+        }, climb);
+    }
+    Command moveRightClimbDown() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerRight(-1.0);
+        }, climb);
+    }
+
     Command holdClimb() {
         return new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+    }
+
+    Command climbStop(){
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(0.0);
+        }, climb);
     }
 
     Command moveLiftUp() {

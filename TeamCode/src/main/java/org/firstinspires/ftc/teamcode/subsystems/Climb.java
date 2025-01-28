@@ -103,6 +103,17 @@ public class Climb extends SubsystemBase {
         rightPower = power;
     }
 
+    public void setMotorPowerLeft(double power){
+        if (power > 1.0){ power = 1.0;}
+        if (power < -1.0){ power = -1.0;}
+        leftPower = power;
+    }
+    public void setMotorPowerRight(double power){
+        if (power > 1.0){ power = 1.0;}
+        if (power < -1.0){ power = -1.0;}
+        rightPower = power;
+    }
+
     public void stopMotors() {
         enabledPID = false;
         leftPower = 0.0;
