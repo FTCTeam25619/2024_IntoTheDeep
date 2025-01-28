@@ -215,6 +215,8 @@ public class Robot2024 extends Robot {
         GamepadButton c2RightStickPress = new GamepadButton(controller2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
         GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
         GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
 
         // Map controller 2 buttons to commands
         // Left stick is mapped to Manual Lift movement up and down
@@ -259,6 +261,8 @@ public class Robot2024 extends Robot {
         GamepadButton c1Y = new GamepadButton(controller1, GamepadKeys.Button.Y);
         GamepadButton c1LeftBumper = new GamepadButton(controller1, GamepadKeys.Button.LEFT_BUMPER);
         GamepadButton c1RightBumper = new GamepadButton(controller1, GamepadKeys.Button.RIGHT_BUMPER);
+        GamepadButton c1Back = new GamepadButton(controller1, GamepadKeys.Button.BACK);
+        GamepadButton c1Start = new GamepadButton(controller1, GamepadKeys.Button.START);
         LeftStickY c2LeftStickYUp = new LeftStickY(controller2, 0.6);
         LeftStickY c2LeftStickYDown = new LeftStickY(controller2, -0.6);
         RightStickY c2RightStickYUp = new RightStickY(controller2, 0.6);
@@ -268,6 +272,8 @@ public class Robot2024 extends Robot {
         GamepadButton c2X = new GamepadButton(controller2, GamepadKeys.Button.X);
         GamepadButton c2Y = new GamepadButton(controller2, GamepadKeys.Button.Y);
         GamepadButton c2LeftBumper = new GamepadButton(controller2, GamepadKeys.Button.LEFT_BUMPER);
+        GamepadButton c2Back = new GamepadButton(controller2, GamepadKeys.Button.BACK);
+        GamepadButton c2Start = new GamepadButton(controller2, GamepadKeys.Button.START);
         // Test positions for tuning
         // Pivot position tuning
         c1A.whenPressed(new InstantCommand(() -> intake.pivotLeftToTestPosition()));
@@ -298,6 +304,17 @@ public class Robot2024 extends Robot {
         c2RightStickYUp.whenInactive(holdClimb());
         c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
         c2RightStickYDown.whenInactive(holdClimb());
+
+        //Manual individual control of climb arms
+        c1Start.whileActiveContinuous(moveLeftClimbUp());
+        c1Start.whenReleased(climbStop());
+        c1Back.whileActiveContinuous(moveLeftClimbDown());
+        c1Back.whenReleased(climbStop());
+
+        c2Start.whileActiveContinuous(moveRightClimbDown());
+        c2Start.whenReleased(climbStop());
+        c2Back.whileActiveContinuous(moveRightClimbUp());
+        c2Back.whenReleased(climbStop());
     }
 
     Command slowDriveModeOn() {
@@ -429,8 +446,41 @@ public class Robot2024 extends Robot {
         }, climb);
     }
 
+    Command moveLeftClimbUp() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerLeft(-1.0);
+        }, climb);
+    }
+    Command moveLeftClimbDown() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerLeft(1.0);
+        }, climb);
+    }
+
+    Command moveRightClimbUp() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerRight(1.0);
+        }, climb);
+    }
+    Command moveRightClimbDown() {
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPowerRight(-1.0);
+        }, climb);
+    }
+
     Command holdClimb() {
         return new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+    }
+
+    Command climbStop(){
+        return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
+            climb.setMotorPower(0.0);
+        }, climb);
     }
 
     Command moveLiftUp() {
