@@ -337,20 +337,23 @@ public class Robot2024 extends Robot {
     Command extendIntake() {
         return new ParallelCommandGroup(
                 extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
+                // Requires intake subsystem
                 new AutoIntakePiece(intake, Robot2024.telemetry)
         );
     }
 
     Command handoffPiece() {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP)),
+                // Intentionally require intake subsystem to ensure we can cancel AutoIntakePiece when needed
+                new InstantCommand(() -> intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP), intake),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitBeforeSlideMove),
                 new InstantCommand(() -> intake.slideToPosition(Constants.Intake.SlideSetPosition.IN)),
                 new WaitCommand(ConfigConstants.IntakeTiming.handoffWaitForMateMS),
-                manualIntake(),
+                slowDriveModeOff(),
+                manualOuttake(),
+                // TODO: Does not require depositor subsystem; do we need to?
                 new AwaitGamePiece(depositor),
-                stopIntakeWheels(),
-                slowDriveModeOff()
+                stopIntakeWheels()
         );
     }
 
