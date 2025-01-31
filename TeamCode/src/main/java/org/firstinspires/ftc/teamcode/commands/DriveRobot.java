@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.ConfigConstants;
@@ -10,23 +11,40 @@ import org.firstinspires.ftc.teamcode.RobotState;
 import org.firstinspires.ftc.teamcode.lib.DriveHelpers;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
+import org.firstinspires.ftc.teamcode.subsystems.Sensors;
+
 public class DriveRobot extends CommandBase {
     private final GamepadEx mController1;
     private final Drivetrain mSubsystem;
     private final Telemetry mTelemetry;
     private final RobotState mRobotState;
+    private final Sensors mSensors;
 
-    public DriveRobot(Drivetrain subsystem, GamepadEx controller1, RobotState robotState, Telemetry robotTelemetry) {
+    //private static final double BUCKET_HEADING_DEGREES = 45.0; // Bucket heading in degrees
+    //private static final double SUBMERSIBLE_HEADING_DEGREES = 90.0; // Submersible heading in degrees
+    private double targetHeadingDegrees = 0.0;
+    private double previousTargetHeadingDegrees = 0.0;
+    private static final double RIGHT_THUMBSTICK_DEADBAND = 0.5;
+    private boolean isOrientationLockActive = false;
+
+    // PID state variables
+    private double integral = 0.0;
+    private double previousError = 0.0;
+
+    public DriveRobot(Drivetrain subsystem, GamepadEx controller1, RobotState robotState, Telemetry robotTelemetry, Sensors sensors) {
         mSubsystem = subsystem;
         mController1 = controller1;
         mRobotState = robotState;
         mTelemetry = robotTelemetry;
+        mSensors = sensors;
 
-        addRequirements(mSubsystem);
+        addRequirements(mSubsystem, mSensors);
     }
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+        isOrientationLockActive = false;
+    }
 
     @Override
     public void execute() {
@@ -51,30 +69,52 @@ public class DriveRobot extends CommandBase {
             mTelemetry.addData("Turn input signed", turn);
         }
 
-        // Prepare drive inputs (deadband, smooth, scale)
+        // Prepare drive inputs
         double power = Math.hypot(y, x);
         double theta = -Math.atan2(y, x);
-        power = this.prepareDriveInputs(power,
+        power = prepareDriveInputs(power,
                 ConfigConstants.DriveControl.POWER_DEADZONE_THRESHOLD_RAW,
                 ConfigConstants.DriveControl.SLOW_DRIVE_MODE_POWER_FACTOR);
-        turn = this.prepareDriveInputs(turn,
+        turn = prepareDriveInputs(turn,
                 ConfigConstants.DriveControl.TURN_DEADZONE_THRESHOLD_RAW,
                 ConfigConstants.DriveControl.SLOW_DRIVE_MODE_TURN_FACTOR);
 
-        mTelemetry.addData("Drive power final", power);
-        mTelemetry.addData("Drive angle final", theta);
-        mTelemetry.addData("Drive turn  final", turn);
 
+        // Handle orientation lock logic
+        handleOrientationLock();
+
+
+        //Apply orientation lock correction if active
+        if (isOrientationLockActive) {
+             turn = calculateOrientationCorrection(targetHeadingDegrees);
+        }
+
+
+        // Drive the robot
         if (mRobotState.robotDriveMode.fieldCentric) {
             mSubsystem.driveRobotFieldCentric(power, theta, turn);
         } else {
             mSubsystem.driveRobot(power, theta, turn);
+        }
+
+        // Debug telemetry
+        if (Constants.DebugModes.DEBUG_TELEMETRY) {
+            double currentHeading = mSensors.getGyroHeadingDeg();
+            double headingError = isOrientationLockActive ? (targetHeadingDegrees - currentHeading) : 0.0;
+            mTelemetry.addData("Y input raw", rawY);
+            mTelemetry.addData("X input raw", rawX);
+            mTelemetry.addData("Turn input raw", rawTurn);
+            mTelemetry.addData("Preset Heading", targetHeadingDegrees);
+            mTelemetry.addData("Current Heading", currentHeading);
+            mTelemetry.addData("Heading Error", headingError);
+            mTelemetry.addData("Orientation Lock Active", isOrientationLockActive);
         }
     }
 
     @Override
     public void end(boolean interrupted) {
         mSubsystem.stopDrive();
+        isOrientationLockActive = false;
     }
 
     @Override
@@ -91,10 +131,75 @@ public class DriveRobot extends CommandBase {
      */
     private double prepareDriveInputs(double input, double deadBandSize, double slowModeFactor) {
         double prepared = DriveHelpers.deadBandJoystick(input, deadBandSize);
-        prepared = DriveHelpers.smoothJoystick(prepared);
+        //prepared = DriveHelpers.smoothJoystick(prepared);
+        prepared = DriveHelpers.smoothJoystickExponential(prepared, ConfigConstants.DriveControl.SMOOTHING_POWER);
         if (mRobotState.slowDriveMode) {
             prepared /= slowModeFactor;
         }
         return prepared;
     }
+
+    private void handleOrientationLock() {
+        boolean bucketOrientationLockButtonPressed = mController1.getButton(GamepadKeys.Button.A);
+        boolean submersibleOrientationLockButtonPressed = mController1.getButton(GamepadKeys.Button.B);
+        if (bucketOrientationLockButtonPressed) {
+            isOrientationLockActive = true;
+            targetHeadingDegrees = ConfigConstants.DriveControl.BUCKET_TARGET_DEGREES;
+        } else if (submersibleOrientationLockButtonPressed) {
+            isOrientationLockActive = true;
+            targetHeadingDegrees = ConfigConstants.DriveControl.SUBMERSIBLE_TARGET_DEGREES;
+        } else {
+            isOrientationLockActive = false;
+            //double x = mController1.getRightX();
+            //double y = mController1.getRightY();
+            //double thumbstickMagnitude = Math.hypot(x, y);
+
+            //if (thumbstickMagnitude > RIGHT_THUMBSTICK_DEADBAND) {
+            //    targetHeadingDegrees = thumbstickToDegrees(x, y);
+            //    previousTargetHeadingDegrees = targetHeadingDegrees;
+           // } else targetHeadingDegrees = previousTargetHeadingDegrees;
+        }
+    }
+
+    private double calculateOrientationCorrection(double targetHeading) {
+        double currentHeading = mSensors.getGyroHeadingDeg();
+        double error = targetHeading - currentHeading;
+
+        // Normalize the error to the range [-180, 180]
+        error = (error + 180) % 360 - 180;
+
+        // Proportional term
+        double proportional = error * ConfigConstants.DriveControl.kP_ORIENTATION;
+
+        // Integral term
+        integral += error;
+        double integralTerm = integral * ConfigConstants.DriveControl.kI_ORIENTATION;
+
+        // Derivative term
+        double derivative = (error - previousError) * ConfigConstants.DriveControl.kD_ORIENTATION;
+        previousError = error;
+
+        // Calculate the total correction
+        double correction = proportional + integralTerm + derivative;
+
+        // Limit the correction to a reasonable range (e.g., [-1, 1])
+        correction = Math.max(-1.0, Math.min(1.0, correction));
+
+        return correction;
+    }
+
+    public double thumbstickToDegrees(double x, double y) {
+        // Calculate the angle in radians using Math.atan2
+        double angleRadians = Math.atan2(x, y); // Note: atan2(x, y) to make 0° correspond to (x=0, y=1)
+
+        // Convert the angle from radians to degrees
+        double angleDegrees = Math.toDegrees(angleRadians);
+
+        // Ensure the angle is in the range [-180, 180]
+        angleDegrees = (angleDegrees + 180) % 360 - 180;
+
+        return angleDegrees;
+    }
 }
+
+

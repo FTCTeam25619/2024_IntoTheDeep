@@ -100,11 +100,7 @@ public class Robot2024 extends Robot {
                 // Servos to Home positions
                 CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
-                drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry));
-                setupGamepadButtonMappings();
-                break;
-            case SERVO_TUNING:
-                setupTuningButtonMappings();
+                drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry, sensors));
                 break;
             case DISSECTION:
                 // Full extent inspection position
