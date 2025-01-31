@@ -252,6 +252,17 @@ public class Robot2024 extends Robot {
 
         c2Back.whenPressed(neutralPosition());
         c2Start.whenPressed(resetPosition());
+
+        // Left stick is mapped to Manual Lift movement up and down
+        c2LeftStickYUp.whileActiveContinuous(moveLiftUp());
+        c2LeftStickYUp.whenInactive(stopLift());
+        c2LeftStickYDown.whileActiveContinuous(moveLiftDown());
+        c2LeftStickYDown.whenInactive(stopLift());
+        // Right stick is mapped to Manual Climb hooks movement up and down
+        c2RightStickYUp.whileActiveContinuous(moveClimbHooksUp());
+        c2RightStickYUp.whenInactive(holdClimb());
+        c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
+        c2RightStickYDown.whenInactive(holdClimb());
     }
 
     private void setupTuningButtonMappings() {
@@ -305,16 +316,6 @@ public class Robot2024 extends Robot {
         c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
         c2RightStickYDown.whenInactive(holdClimb());
 
-        //Manual individual control of climb arms
-        c1Start.whileActiveContinuous(moveLeftClimbUp());
-        c1Start.whenReleased(climbStop());
-        c1Back.whileActiveContinuous(moveLeftClimbDown());
-        c1Back.whenReleased(climbStop());
-
-        c2Start.whileActiveContinuous(moveRightClimbDown());
-        c2Start.whenReleased(climbStop());
-        c2Back.whileActiveContinuous(moveRightClimbUp());
-        c2Back.whenReleased(climbStop());
     }
 
     Command slowDriveModeOn() {
@@ -435,52 +436,28 @@ public class Robot2024 extends Robot {
 
     Command moveClimbHooksUp() {
         return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(1.0);
         }, climb);
     }
 
     Command moveClimbHooksDown() {
         return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
-        }, climb);
-    }
-
-    Command moveLeftClimbUp() {
-        return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPowerLeft(-1.0);
-        }, climb);
-    }
-    Command moveLeftClimbDown() {
-        return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPowerLeft(1.0);
-        }, climb);
-    }
-
-    Command moveRightClimbUp() {
-        return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPowerRight(1.0);
-        }, climb);
-    }
-    Command moveRightClimbDown() {
-        return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPowerRight(-1.0);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(-1.0);
         }, climb);
     }
 
     Command holdClimb() {
-        return new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+        return new InstantCommand(() ->{
+            climb.setClimbState(Climb.State.HOLD);
+            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+        }, climb);
     }
 
     Command climbStop(){
         return new InstantCommand(() -> {
-            climb.enablePIDHold(false);
-            climb.setMotorPower(0.0);
+            climb.setClimbState(Climb.State.STOP);
         }, climb);
     }
 

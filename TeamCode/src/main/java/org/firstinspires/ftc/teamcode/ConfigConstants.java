@@ -10,6 +10,9 @@ public class ConfigConstants {
         public static volatile double kI = 0.0;
         public static volatile double kD = 0.0;
         public static volatile double kF = 0.0;
+        public static volatile double SYNC_KP = 0.002;
+        public static volatile double SYNC_KI = 0.0;
+        public static volatile double SYNC_KD = 0.0;
         public static volatile double pidTolerance = 500.0;
         public static volatile int holdTimeoutMS = 600000;
         public static volatile double maxHoldMotorPower = 0.1;
