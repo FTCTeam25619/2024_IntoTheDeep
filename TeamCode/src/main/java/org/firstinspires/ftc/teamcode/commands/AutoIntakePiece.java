@@ -11,15 +11,14 @@ public class AutoIntakePiece extends CommandBase {
     private final Telemetry mTelemetry;
     private final AllianceColor allianceColor;  // Alliance color selected via opmode
 
-    // A counter used in the EJECT state to run outtake for a set duration.
     private int countAfterPiece;
 
-    // Define a state machine with three states.
-    private enum State {
+    // Define states.
+    public enum State {
         INTAKE,    // Actively intake a game piece.
-        ACCEPT,    // Correct (acceptable) piece detected: stop intake.
+        ACCEPT,    // Correct piece detected: stop intake.
         EJECT,      // Wrong piece detected: eject for a set time.
-        STOP        // Stop the intake.
+        STOP       // Stop intake.
     }
 
     private State currentState;
@@ -32,35 +31,35 @@ public class AutoIntakePiece extends CommandBase {
         BLUE
     }
 
+    // Callback to be run when a correct piece is acquired.
+    private Runnable onPieceAccepted;
+    // To ensure we only call the callback once per accepted piece.
+    private boolean callbackCalled = false;
+
     /**
-     * Constructor now accepts an AllianceColor parameter.
-     *
-     * @param subsystem      The intake subsystem.
-     * @param telemetry      Telemetry for debug output.
-     * @param allianceColor  The alliance color for the current opmode.
+     * Constructor.
      */
     public AutoIntakePiece(Intake subsystem, Telemetry telemetry, AllianceColor allianceColor) {
         this.mSubsystem = subsystem;
         this.mTelemetry = telemetry;
         this.allianceColor = allianceColor;
         this.countAfterPiece = 0;
-        this.currentState = State.INTAKE;
+        this.currentState = State.STOP;
         addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
-        currentState = State.INTAKE;
+        currentState = State.STOP;
         countAfterPiece = 0;
+        callbackCalled = false;
     }
 
     @Override
     public void execute() {
         switch (currentState) {
             case INTAKE:
-                // Actively run the intake.
                 mSubsystem.intakePiece();
-                // When a piece is detected, check its color.
                 if (mSubsystem.seeingPiece()) {
                     boolean pieceAcceptable = false;
                     if (mSubsystem.isYellowPiece()) {
@@ -70,43 +69,46 @@ public class AutoIntakePiece extends CommandBase {
                     } else if (allianceColor == AllianceColor.BLUE && mSubsystem.isBluePiece()) {
                         pieceAcceptable = true;
                     }
-                    // Transition to the appropriate state.
+                    // Transition based on the piece color.
                     if (pieceAcceptable) {
                         currentState = State.ACCEPT;
                     } else {
                         currentState = State.EJECT;
-                        countAfterPiece = 0; // Reset the eject timer.
+                        countAfterPiece = 0;
                     }
                 }
                 break;
 
             case ACCEPT:
-                // Correct piece acquired: stop the intake.
-                mSubsystem.stopIntake();
-                // Remain in this state until the piece is removed.
+                if (onPieceAccepted != null && !callbackCalled) {
+                    callbackCalled = true;
+                    onPieceAccepted.run(); // This schedules handoffPiece.
+                }
+                // Stay in ACCEPT until the piece is removed.
                 if (!mSubsystem.seeingPiece()) {
-                    // Once the piece is no longer detected, resume intaking.
-                    currentState = State.INTAKE;
+                    // Reset for the next piece.
+                    mSubsystem.stopIntake();
+                    currentState = State.STOP;
+                    callbackCalled = false;
                 }
                 break;
+
 
             case EJECT:
                 // Wrong piece: outtake (eject) the piece.
                 mSubsystem.outtakePiece();
                 countAfterPiece++;
-                // After a set number of cycles, assume the piece has been ejected.
                 if (countAfterPiece >= ConfigConstants.IntakeTiming.cyclesEject) {
-                    // Resume intaking regardless of sensor reading.
                     currentState = State.INTAKE;
                 }
                 break;
             case STOP:
-                // Stop the intake.
                 mSubsystem.stopIntake();
-                countAfterPiece = 0;
+                break;
+            default:
+                break;
         }
 
-        // Telemetry for debugging.
         if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("AutoIntake State - INTAKE", currentState == State.INTAKE);
             mTelemetry.addData("AutoIntake State - ACCEPT", currentState == State.ACCEPT);
@@ -123,7 +125,24 @@ public class AutoIntakePiece extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        // This command is designed to run continuously until canceled.
+        // Run continuously until canceled.
         return false;
     }
+
+    // Public setter for the callback.
+    public void setOnPieceAccepted(Runnable callback) {
+        this.onPieceAccepted = callback;
+    }
+
+    // Optionally, a public getter for the current state if needed.
+    public State getCurrentState() {
+        return currentState;
+    }
+    public void setState(State newState) {
+        this.currentState = newState;
+        this.countAfterPiece = 0; // Optionally reset your timer
+    }
+
 }
+
+

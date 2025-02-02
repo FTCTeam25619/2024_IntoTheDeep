@@ -66,6 +66,8 @@ public class Robot2024 extends Robot {
     private final OpModeSelection selectedOpMode;
     private final AutoIntakePiece.AllianceColor allianceColor;
 
+    private AutoIntakePiece autoIntakeCommand;
+
     public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, OpModeSelection opModeSelection) {
         // OpMode selection
         selectedOpMode = opModeSelection;
@@ -108,6 +110,22 @@ public class Robot2024 extends Robot {
         climb = new Climb(hardwareMap, sensors, Robot2024.telemetry);
         sweep = new Sweep(hardwareMap, Robot2024.telemetry);
         leds = new LEDs(hardwareMap, sensors, intake, depositor, Robot2024.telemetry);
+
+        // In your Robot2024 constructor:
+        autoIntakeCommand = new AutoIntakePiece(intake, telemetry, allianceColor);
+        // Initially, autoIntakeCommand is in the STOP state.
+        autoIntakeCommand.setState(AutoIntakePiece.State.STOP);
+
+        // Set the callback: when an acceptable piece is detected, schedule handoffPiece.
+        autoIntakeCommand.setOnPieceAccepted(() -> {
+            // This callback is executed only once per accepted piece.
+            CommandScheduler.getInstance().schedule(handoffPiece());
+        });
+
+        // Schedule the autoIntakeCommand to run continuously.
+        CommandScheduler.getInstance().schedule(autoIntakeCommand);
+
+
     }
 
     public void initOpMode() {
@@ -369,13 +387,14 @@ public class Robot2024 extends Robot {
                 new InstantCommand(() -> depositor.wristToPosition(Constants.Depositor.WristSetPosition.INTAKE))
         );
     }
+
     Command extendIntake() {
         return new ParallelCommandGroup(
                 extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
-                // Requires intake subsystem
-                new AutoIntakePiece(intake, Robot2024.telemetry, allianceColor)
+                new InstantCommand(() -> autoIntakeCommand.setState(AutoIntakePiece.State.INTAKE))
         );
     }
+
 
     Command handoffPiece() {
         return new SequentialCommandGroup(
