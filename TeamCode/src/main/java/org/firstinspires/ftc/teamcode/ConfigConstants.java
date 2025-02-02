@@ -44,6 +44,7 @@ public class ConfigConstants {
     public static class IntakeTiming {
         public static volatile int cycleWaitAfterPiece = 10;
         public static volatile int cyclesReverse = -1;
+        public static volatile int cyclesEject = 10;
         public static volatile double spinSpeedFactor = 1.0;
         public static volatile int handoffWaitForMateMS = 300;
         public static volatile int handoffWaitBeforeSlideMove = 250;

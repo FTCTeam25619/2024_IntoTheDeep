@@ -14,6 +14,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -63,11 +64,26 @@ public class Robot2024 extends Robot {
     public static Telemetry telemetry;
 
     private final OpModeSelection selectedOpMode;
+    private final AutoIntakePiece.AllianceColor allianceColor;
 
     public Robot2024(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, OpModeSelection opModeSelection) {
         // OpMode selection
         selectedOpMode = opModeSelection;
 
+        // Determine the alliance color based on opmode.
+        // (Assumes you have TELEOP_RED and TELEOP_BLUE as opmode choices.)
+        switch (selectedOpMode) {
+            case DRIVE_STICKS_TELEOP_RED:
+                allianceColor = AutoIntakePiece.AllianceColor.RED;
+                break;
+            case DRIVE_STICKS_TELEP_BLUE:
+                allianceColor = AutoIntakePiece.AllianceColor.BLUE;
+                break;
+            default:
+                // For non-teleop modes, you might default or throw an error.
+                allianceColor = AutoIntakePiece.AllianceColor.RED;
+                break;
+        }
         // Telemetry
         Robot2024.telemetry = telemetry;
 
@@ -96,7 +112,8 @@ public class Robot2024 extends Robot {
 
     public void initOpMode() {
         switch (selectedOpMode) {
-            case DRIVE_STICKS_TELEOP:
+            case DRIVE_STICKS_TELEOP_RED:
+            case DRIVE_STICKS_TELEP_BLUE:
                 // Servos to Home positions
                 CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
@@ -356,7 +373,7 @@ public class Robot2024 extends Robot {
         return new ParallelCommandGroup(
                 extendIntakeToSlidePosition(Constants.Intake.SlideSetPosition.OUT_NEAR),
                 // Requires intake subsystem
-                new AutoIntakePiece(intake, Robot2024.telemetry)
+                new AutoIntakePiece(intake, Robot2024.telemetry, allianceColor)
         );
     }
 

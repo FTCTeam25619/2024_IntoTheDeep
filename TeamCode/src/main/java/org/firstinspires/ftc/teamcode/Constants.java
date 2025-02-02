@@ -235,7 +235,9 @@ public final class Constants {
         public enum OpModeSelection{
             DISSECTION(OpModeType.TELEOP),
             SERVO_TUNING(OpModeType.TELEOP),
-            DRIVE_STICKS_TELEOP(OpModeType.TELEOP);
+            DRIVE_STICKS_TELEOP_RED(OpModeType.TELEOP),
+            DRIVE_STICKS_TELEP_BLUE(OpModeType.TELEOP);
+
 
             private OpModeType opModeType;
 

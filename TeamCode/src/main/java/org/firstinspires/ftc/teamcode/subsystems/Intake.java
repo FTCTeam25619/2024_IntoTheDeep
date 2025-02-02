@@ -178,7 +178,7 @@ public class Intake extends SubsystemBase{
         return colorSensor.getNormalizedColors();
     }
 
-    private float getHue() {
+    public float getHue() {
         NormalizedRGBA argb = colorSensor.getNormalizedColors();
         float[] hsv = new float[3];
         Color.colorToHSV(argb.toColor(), hsv);
@@ -198,5 +198,20 @@ public class Intake extends SubsystemBase{
         if (GamePieceColor.RED.matches(hue)) return GamePieceColor.RED;
         if (GamePieceColor.YELLOW.matches(hue)) return GamePieceColor.YELLOW;
         return GamePieceColor.BLACK;
+    }
+
+    public boolean isRedPiece() {
+        float hue = getHue();
+        return GamePieceColor.RED.matches(hue);
+    }
+
+    public boolean isBluePiece() {
+        float hue = getHue();
+        return GamePieceColor.BLUE.matches(hue);
+    }
+
+    public boolean isYellowPiece() {
+        float hue = getHue();
+        return GamePieceColor.YELLOW.matches(hue);
     }
 }
