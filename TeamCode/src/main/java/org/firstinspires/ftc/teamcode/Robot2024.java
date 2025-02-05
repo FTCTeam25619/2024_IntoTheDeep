@@ -458,6 +458,7 @@ public class Robot2024 extends Robot {
 
     Command climbStop(){
         return new InstantCommand(() -> {
+            climb.enablePIDHold(false);
             climb.setClimbState(Climb.State.STOP);
         }, climb);
     }

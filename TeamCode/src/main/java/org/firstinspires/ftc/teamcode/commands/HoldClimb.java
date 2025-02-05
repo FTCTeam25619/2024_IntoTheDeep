@@ -33,7 +33,10 @@ public class HoldClimb extends CommandBase {
 
     @Override
     public void initialize() {
+        mClimb.enablePIDHold(true);
         mClimb.setClimbState(Climb.State.HOLD);
+        startTimeMS = SystemClock.elapsedRealtime();
+        endTimeMS = startTimeMS + holdDurationMS;
         if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Climb/HoldClimb: start (ms)", startTimeMS);
             mTelemetry.addData("Climb/HoldClimb: end (ms)", endTimeMS);
@@ -53,6 +56,7 @@ public class HoldClimb extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        mClimb.enablePIDHold(false);
         mClimb.setClimbState(Climb.State.STOP);
         if (!interrupted) {
             mClimb.setClimbState(Climb.State.STOP);
