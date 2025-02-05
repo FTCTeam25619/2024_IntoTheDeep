@@ -450,6 +450,7 @@ public class Robot2024 extends Robot {
 
     Command holdClimb() {
         return new InstantCommand(() ->{
+            climb.enablePIDHold(true);
             climb.setClimbState(Climb.State.HOLD);
             new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
         }, climb);
