@@ -102,14 +102,17 @@ public class Robot2024 extends Robot {
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry, sensors));
                 setupGamepadButtonMappings();
+                leds.initializeLEDs();
                 break;
             case SERVO_TUNING:
                 setupTuningButtonMappings();
+                leds.initializeLEDs();
                 break;
             case DISSECTION:
                 // Full extent inspection position
                 CommandScheduler.getInstance().schedule(dissection());
                 setupGamepadButtonMappings();
+                leds.initializeLEDs();
                 break;
         }
     }
