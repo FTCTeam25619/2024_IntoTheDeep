@@ -129,7 +129,7 @@ public final class Constants {
     public static final class Intake {
         public static enum SlideSetPosition {
             IN(0.09, 0.91),
-            NEUTRAL(.09, .91),
+            NEUTRAL(.3, .7),
             OUT_NEAR(.6, .4),
             OUT_FAR(0.65, 0.45);
 
@@ -166,7 +166,7 @@ public final class Constants {
         public static enum ArmSetPosition {
             HOME(.89, .11),
             NEUTRAL(.89, .11),
-            SCORING(0.62, 0.38),
+            SCORING(0.38, 0.62),
             SPECIMENSCORING (.67, .33),
             SPECIMENINTAKE (0.0,1.0);
 

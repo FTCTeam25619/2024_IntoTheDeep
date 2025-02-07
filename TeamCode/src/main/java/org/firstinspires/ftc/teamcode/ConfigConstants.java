@@ -34,7 +34,7 @@ public class ConfigConstants {
         public static volatile double liftUpMotorPower = 0.5;
         public static volatile double climbUpMotorPower = -1.0;
         public static volatile double climbDownMotorPower = 1.0;
-        public static volatile double slideManualIncrementExtend = 0.03;
+        public static volatile double slideManualIncrementExtend = 0.01;
         public static volatile double slideManualIncrementRetract = -0.03;
         public static volatile double slideManualDeadband = 0.1;
         public static volatile double slideManualThreshold = 0.1;
@@ -45,18 +45,18 @@ public class ConfigConstants {
         public static volatile int cycleWaitAfterPiece = 10;
         public static volatile int cyclesReverse = -1;
         public static volatile double spinSpeedFactor = 1.0;
-        public static volatile int handoffWaitForMateMS = 600;
+        public static volatile int handoffWaitForMateMS = 1000;
         public static volatile int handoffWaitBeforeSlideMove = 250;
-        public static volatile int extendWaitBeforePivotMove = 150;
+        public static volatile int extendWaitBeforePivotMove = 350;
     }
 
     @Config
     public static class ScoringTiming {
         public static volatile int preScoreWaitForLiftMS = 100;
         public static volatile int preScoreWaitForArmMS = 500;
-        public static volatile int preScoreWaitForWristMS = 550;
+        public static volatile int preScoreWaitForWristMS = 100;
         public static volatile int postScoreWaitForArmMS = 500;
-        public static volatile int postScoreWaitForWristMS = 250;
+        public static volatile int postScoreWaitForWristMS = 50;
         public static volatile int postScoreWaitForLiftMS = 500;
         public static volatile int postScoreWaitForHomeMS = 1000;
     }

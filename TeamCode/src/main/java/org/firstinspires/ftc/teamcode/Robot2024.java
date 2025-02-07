@@ -101,6 +101,7 @@ public class Robot2024 extends Robot {
                 CommandScheduler.getInstance().schedule(resetPosition());
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry, sensors));
+                setupGamepadButtonMappings();
                 break;
             case SERVO_TUNING:
                 setupTuningButtonMappings();
@@ -173,8 +174,14 @@ public class Robot2024 extends Robot {
         // Right bumper will release piece and retract scoring mechanism
         c1RightBumper.whenPressed(scoreBasketAndReturnHome());
 
+        // Manual intake slide controls
         c1LeftTrigger.whileActiveContinuous(manualRetractSlide(c1LeftTrigger));
         c1RightTrigger.whileActiveContinuous(manualExtendSlide(c1RightTrigger));
+
+        // Manual intake pivot up and down
+        c1DPadUp.whenPressed(intakeUp());
+        c1DPadDown.whenPressed(intakeDown());
+
 
         // Reset the Gyro for field-oriented drive
         c1Start.whenPressed(resetGyro());
@@ -521,5 +528,16 @@ public class Robot2024 extends Robot {
 
     Command resetGyro() {
         return new InstantCommand(sensors::resetGyro);
+    }
+
+    Command intakeUp() {
+        return new InstantCommand(() -> {
+            intake.pivotToPosition(Constants.Intake.PivotSetPosition.UP);
+        }, climb);
+    }
+    Command intakeDown() {
+        return new InstantCommand(() -> {
+            intake.pivotToPosition(Constants.Intake.PivotSetPosition.DOWN);
+        }, climb);
     }
 }
