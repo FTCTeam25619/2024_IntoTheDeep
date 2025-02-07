@@ -85,7 +85,7 @@ public final class Constants {
 
     public static final class Lift {
         public static final double MAX_V = 3.070;
-        public static final double MIN_V = 1.680;
+        public static final double MIN_V = 1.672;
         public static final double V_RANGE = MAX_V - MIN_V;
         public static final double POT_ROTATIONS = 10.0;
         public static final double SPOOL_CIRC_CM = 7.5819;
@@ -128,10 +128,10 @@ public final class Constants {
 
     public static final class Intake {
         public static enum SlideSetPosition {
-            IN(0.06, 0.94),
-            NEUTRAL(0.1, 0.90),
-            OUT_NEAR(0.25, 0.75),
-            OUT_FAR(0.4, 0.555);
+            IN(0.09, 0.91),
+            NEUTRAL(.09, .91),
+            OUT_NEAR(.6, .4),
+            OUT_FAR(0.65, 0.45);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -143,8 +143,8 @@ public final class Constants {
         }
 
         public static enum PivotSetPosition {
-            UP(0.87, 0.12),
-            DOWN(0.01, 0.985);
+            UP(.825, .175),
+            DOWN(0.0, 1.0);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -164,11 +164,11 @@ public final class Constants {
 
     public static final class Depositor {
         public static enum ArmSetPosition {
-            HOME(0.09, 0.91),
-            NEUTRAL(0.09, 0.91),
+            HOME(.89, .11),
+            NEUTRAL(.89, .11),
             SCORING(0.62, 0.38),
-            SPECIMENSCORING (0.33, 0.67),
-            SPECIMENINTAKE (1.0,0.0);
+            SPECIMENSCORING (.67, .33),
+            SPECIMENINTAKE (0.0,1.0);
 
             public final double leftPosition;
             public final double rightPosition;
@@ -180,7 +180,7 @@ public final class Constants {
         }
 
         public static enum WristSetPosition {
-            INTAKE(0.0),
+            INTAKE(0.07),
             SCORING(0.4),
             SPECIMEN (1.0);
 
@@ -193,8 +193,8 @@ public final class Constants {
         }
 
         public static enum GripSetPosition {
-            OPEN(0.2),
-            CLOSED(0.55);
+            OPEN(0.0),
+            CLOSED(0.57);
 
             public final double position;
 

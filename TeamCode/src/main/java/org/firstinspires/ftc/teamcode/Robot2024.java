@@ -102,6 +102,9 @@ public class Robot2024 extends Robot {
                 // Left and Right Sticks
                 drivetrain.setDefaultCommand(new DriveRobot(drivetrain, controller1, robotState, Robot2024.telemetry, sensors));
                 break;
+            case SERVO_TUNING:
+                setupTuningButtonMappings();
+                break;
             case DISSECTION:
                 // Full extent inspection position
                 CommandScheduler.getInstance().schedule(dissection());

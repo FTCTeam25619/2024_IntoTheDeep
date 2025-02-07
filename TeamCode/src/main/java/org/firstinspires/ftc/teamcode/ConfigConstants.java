@@ -45,15 +45,15 @@ public class ConfigConstants {
         public static volatile int cycleWaitAfterPiece = 10;
         public static volatile int cyclesReverse = -1;
         public static volatile double spinSpeedFactor = 1.0;
-        public static volatile int handoffWaitForMateMS = 300;
+        public static volatile int handoffWaitForMateMS = 600;
         public static volatile int handoffWaitBeforeSlideMove = 250;
         public static volatile int extendWaitBeforePivotMove = 150;
     }
 
     @Config
     public static class ScoringTiming {
-        public static volatile int preScoreWaitForLiftMS = 250;
-        public static volatile int preScoreWaitForArmMS = 0;
+        public static volatile int preScoreWaitForLiftMS = 100;
+        public static volatile int preScoreWaitForArmMS = 500;
         public static volatile int preScoreWaitForWristMS = 550;
         public static volatile int postScoreWaitForArmMS = 500;
         public static volatile int postScoreWaitForWristMS = 250;
