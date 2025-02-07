@@ -232,10 +232,9 @@ public class Robot2024 extends Robot {
         c2LeftStickYDown.whenInactive(stopLift());
         // Right stick is mapped to Manual Climb hooks movement up and down
         c2RightStickYUp.whileActiveContinuous(moveClimbHooksUp());
-        c2RightStickYUp.whenInactive(holdClimb());
         c2RightStickYDown.whileActiveContinuous(moveClimbHooksDown());
-        c2RightStickYDown.whenInactive(holdClimb());
-        // Right and left triggers are mapped to Manual Intake wheels movement in (intake) and out (eject) respectively
+        c2RightStickYUp.whenInactive(this::checkAndHoldClimb);
+        c2RightStickYDown.whenInactive(this::checkAndHoldClimb);
 
         // Press and hold DPad Up to sweep in front of the robot. Sweeper bar will return when released.
         c2DPadUp.whenPressed(sweepOut());
@@ -247,15 +246,17 @@ public class Robot2024 extends Robot {
         c2B.whenPressed(moveToScoringPosition(Constants.ScoringPosition.LOW_BASKET));
         c2Y.whenPressed(moveToScoringPosition(Constants.ScoringPosition.HIGH_BASKET));
 
+        //Extend and retract intake
         c2LeftBumper.whenPressed(handoffPiece());
         c2RightBumper.whenPressed(extendIntake());
 
+        // Right and left triggers are mapped to Manual Intake wheels movement in (intake) and out (eject) respectively
         c2LeftTrigger.whileActiveContinuous(manualOuttake());
         c2LeftTrigger.whenInactive(stopIntakeWheels());
 
         c2RightTrigger.whileActiveContinuous(manualIntake());
         c2RightTrigger.whenInactive(stopIntakeWheels());
-
+        // Reset servo positions
         c2Back.whenPressed(neutralPosition());
         c2Start.whenPressed(resetPosition());
     }
@@ -442,51 +443,69 @@ public class Robot2024 extends Robot {
     Command moveClimbHooksUp() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbUpMotorPower);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(ConfigConstants.ManualMovement.climbUpMotorPower);
         }, climb);
     }
 
     Command moveClimbHooksDown() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPower(ConfigConstants.ManualMovement.climbDownMotorPower);
+            climb.setClimbState(Climb.State.CLIMB);
+            climb.setTargetPower(ConfigConstants.ManualMovement.climbDownMotorPower);
         }, climb);
     }
 
     Command moveLeftClimbUp() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPowerLeft(-1.0);
+            climb.setClimbState(Climb.State.MANUALMOVE);
+            climb.setMotorPowerLeft(-0.5);
         }, climb);
     }
     Command moveLeftClimbDown() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPowerLeft(1.0);
+            climb.setClimbState(Climb.State.MANUALMOVE);
+            climb.setMotorPowerLeft(0.5);
         }, climb);
     }
 
     Command moveRightClimbUp() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPowerRight(1.0);
+            climb.setClimbState(Climb.State.MANUALMOVE);
+            climb.setMotorPowerRight(0.5);
         }, climb);
     }
     Command moveRightClimbDown() {
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPowerRight(-1.0);
+            climb.setClimbState(Climb.State.MANUALMOVE);
+            climb.setMotorPowerRight(-0.5);
         }, climb);
     }
 
+    private void checkAndHoldClimb() {
+        RightStickY c2RightStickYUp = new RightStickY(controller2, 0.6);
+        RightStickY c2RightStickYDown = new RightStickY(controller2, -0.6);
+        if (!c2RightStickYUp.get() && !c2RightStickYDown.get()) {
+            CommandScheduler.getInstance().schedule(holdClimb());
+        }
+    }
+
     Command holdClimb() {
-        return new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+        return new InstantCommand(() ->{
+            climb.enablePIDHold(true);
+            climb.setClimbState(Climb.State.HOLD);
+            new HoldClimb(climb, ConfigConstants.Climb.holdTimeoutMS, Robot2024.telemetry);
+        }, climb);
     }
 
     Command climbStop(){
         return new InstantCommand(() -> {
             climb.enablePIDHold(false);
-            climb.setMotorPower(0.0);
+            climb.setClimbState(Climb.State.STOP);
         }, climb);
     }
 
