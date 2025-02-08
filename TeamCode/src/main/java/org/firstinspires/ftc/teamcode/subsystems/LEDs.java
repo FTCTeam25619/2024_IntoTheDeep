@@ -33,11 +33,6 @@ public class LEDs extends SubsystemBase {
      */
     public void initializeLEDs() {
         setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_PARTY_PALETTE);
-        try {
-            Thread.sleep(50); // short delay to allow the LED driver to register the PWM signal
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         isInitialized = true;
     }
 
