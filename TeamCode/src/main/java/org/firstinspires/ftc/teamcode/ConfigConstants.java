@@ -102,13 +102,14 @@ public class ConfigConstants {
 
         public static volatile double SMOOTHING_POWER = 4.0;
         // joystick control deadzone for drive power (in polar coordinates) in [-1,1] range
+        public static volatile double INPUT_SMOOTHING_ALPHA = 0.5;
         public static volatile double POWER_DEADZONE_THRESHOLD_RAW = 0.1 * Math.sqrt(2.0);
 
         // joystick control deadzone for turn in [-1,1] range;
         public static volatile double TURN_DEADZONE_THRESHOLD_RAW = 0.1;
 
-        public static volatile double SLOW_DRIVE_MODE_POWER_FACTOR = 1.8;
-        public static volatile double SLOW_DRIVE_MODE_TURN_FACTOR = 4.0;
+        public static volatile double SLOW_DRIVE_MODE_POWER_FACTOR = 4.0;
+        public static volatile double SLOW_DRIVE_MODE_TURN_FACTOR = 6.0;
 
         public static volatile double kP_ORIENTATION = 0.018;
         public static volatile double kI_ORIENTATION = 0.0;

@@ -20,16 +20,15 @@ public class DriveRobot extends CommandBase {
     private final RobotState mRobotState;
     private final Sensors mSensors;
 
-    //private static final double BUCKET_HEADING_DEGREES = 45.0; // Bucket heading in degrees
-    //private static final double SUBMERSIBLE_HEADING_DEGREES = 90.0; // Submersible heading in degrees
     private double targetHeadingDegrees = 0.0;
-    private double previousTargetHeadingDegrees = 0.0;
-    private static final double RIGHT_THUMBSTICK_DEADBAND = 0.5;
     private boolean isOrientationLockActive = false;
 
     // PID state variables
     private double integral = 0.0;
     private double previousError = 0.0;
+    private double previousX = 0.0;
+    private double previousY = 0.0;
+    private double previousTurn = 0.0;
 
     public DriveRobot(Drivetrain subsystem, GamepadEx controller1, RobotState robotState, Telemetry robotTelemetry, Sensors sensors) {
         mSubsystem = subsystem;
@@ -38,7 +37,7 @@ public class DriveRobot extends CommandBase {
         mTelemetry = robotTelemetry;
         mSensors = sensors;
 
-        addRequirements(mSubsystem, mSensors);
+        addRequirements(mSubsystem);
     }
 
     @Override
@@ -63,11 +62,23 @@ public class DriveRobot extends CommandBase {
         double x = rawY;
         double y = rawX;
         double turn = -rawTurn;
+
+        // Smooth over time (EMA) to prevent abrupt changes
+        x = DriveHelpers.smoothInput(previousX, x, ConfigConstants.DriveControl.INPUT_SMOOTHING_ALPHA);
+        y = DriveHelpers.smoothInput(previousY, y, ConfigConstants.DriveControl.INPUT_SMOOTHING_ALPHA);
+        turn = DriveHelpers.smoothInput(previousTurn, turn, ConfigConstants.DriveControl.INPUT_SMOOTHING_ALPHA);
+
+        // Update previous values for next loop iteration
+        previousX = x;
+        previousY = y;
+        previousTurn = turn;
+
         if (Constants.DebugModes.DEBUG_TELEMETRY) {
             mTelemetry.addData("Y input signed", y);
             mTelemetry.addData("X input signed", x);
             mTelemetry.addData("Turn input signed", turn);
         }
+
 
         // Prepare drive inputs
         double power = Math.hypot(y, x);
@@ -86,7 +97,7 @@ public class DriveRobot extends CommandBase {
 
         //Apply orientation lock correction if active
         if (isOrientationLockActive) {
-             turn = calculateOrientationCorrection(targetHeadingDegrees);
+            turn = calculateOrientationCorrection(targetHeadingDegrees);
         }
 
 
@@ -150,14 +161,6 @@ public class DriveRobot extends CommandBase {
             targetHeadingDegrees = ConfigConstants.DriveControl.SUBMERSIBLE_TARGET_DEGREES;
         } else {
             isOrientationLockActive = false;
-            //double x = mController1.getRightX();
-            //double y = mController1.getRightY();
-            //double thumbstickMagnitude = Math.hypot(x, y);
-
-            //if (thumbstickMagnitude > RIGHT_THUMBSTICK_DEADBAND) {
-            //    targetHeadingDegrees = thumbstickToDegrees(x, y);
-            //    previousTargetHeadingDegrees = targetHeadingDegrees;
-           // } else targetHeadingDegrees = previousTargetHeadingDegrees;
         }
     }
 
@@ -188,18 +191,8 @@ public class DriveRobot extends CommandBase {
         return correction;
     }
 
-    public double thumbstickToDegrees(double x, double y) {
-        // Calculate the angle in radians using Math.atan2
-        double angleRadians = Math.atan2(x, y); // Note: atan2(x, y) to make 0° correspond to (x=0, y=1)
-
-        // Convert the angle from radians to degrees
-        double angleDegrees = Math.toDegrees(angleRadians);
-
-        // Ensure the angle is in the range [-180, 180]
-        angleDegrees = (angleDegrees + 180) % 360 - 180;
-
-        return angleDegrees;
-    }
 }
+
+
 
 

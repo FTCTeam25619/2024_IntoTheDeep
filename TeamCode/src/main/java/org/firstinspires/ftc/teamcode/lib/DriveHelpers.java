@@ -44,4 +44,15 @@ public final class DriveHelpers {
                 Math.max(Math.abs(leftRear), Math.abs(rightRear))
         );
     }
+
+    /**
+     * *Applies an exponential moving average to smooth the joystick input
+     * @param previous The previously smoothed value
+     * @param current The current joystick input
+     * @param alpha The smoothing factor ( 0 < alpha <= 1). Lower values produce more smoothing but robot response may feel laggy
+     * @return The new smoothed value
+     */
+    public static double smoothInput(double previous, double current, double alpha){
+        return previous + alpha * (current - previous);
+    }
 }
